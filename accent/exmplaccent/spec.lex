@@ -1,4 +1,5 @@
 %{
+#include "yystype.h"
 #include "yygrammar.h"
 %}
 %%

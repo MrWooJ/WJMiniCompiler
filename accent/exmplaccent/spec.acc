@@ -1,3 +1,8 @@
+%prelude {
+#include "yystype.h"
+#include "outputHandler.h"
+}
+	 
 %token bool,‬‬ ‫‪break,‬‬ ‫‪case,‬‬ ‫‪char,‬‬ ‫‪const,‬‬ ‫‪continue,‬‬ ‫‪default,‬‬ ‫‪double,‬‬ ‫‪else,‬‬ ‫‪extern,‬‬ ‫‪false,‬‬ ‫function,‬‬ ‫‪float,‬‬ ‫‪for,‬‬ ‫‪goto,‬‬ ‫‪if,‬‬ ‫‪input,‬‬ ‫‪int,‬‬ ‫‪long,‬‬ ‫‪output,‬‬ ‫‪return,‬‬ ‫‪record,‬‬ ‫‪sizeof,‬‬ ‫‪static,‬‬ ‫‪string,‬‬ ‫‪switch,‬‬ ‫‪true‬‬, procedure;
 
 program :
@@ -11,12 +16,12 @@ func_proc :
 ;
 
 func_dcl :
-	type id ((arguments)?);
-| type id ((arguments)?) block
+	type id '(' (arguments)? ')' ';'
+| type id '(' (arguments)? ')' block
 ;
 
 extern_dcl :
-	extern type id;
+	extern type id';'
 ;
 
 arguments :
@@ -24,8 +29,8 @@ arguments :
 ;
 
 proc_dcl :
-	procedure id ((arguments)?);
-| procedure id ((arguments)?) block
+	procedure id '(' (arguments)? ')'';'
+| procedure id '(' (arguments)? ')' block
 ;
 
 type :
@@ -42,11 +47,11 @@ type :
 ;
 
 struct_dec :
-	record id '{'(var_dcl)+'}';
+	record id '{'(var_dcl)+'}'';'
 ;
 
 var_dcl :
-	(const)? type var_dcl_cnt ((','var_dcl_cnt)?)*;
+	(const)? type var_dcl_cnt ((',' var_dcl_cnt)?)* ';'
 ;
 
 var_dcl_cnt :
@@ -58,16 +63,16 @@ block :
 ;
 
 statemetn :
-	assignment;
-| method_call;
+	assignment';'
+| method_call';'
 | cond_stmt
 | loop_stmt
-| return (expr)?;
+| return (expr)?';'
 | goto;
 | label
 | break;
 | continue;
-| sizeof'(' type ')';
+| sizeof'(' type ')'';'
 ;
 
 assignment :
@@ -75,23 +80,23 @@ assignment :
 ;
 
 method_call :
-	id ((parameters)?)
+	id '(' (parameters)? ')'
 ;
 
 parameters :
 	expr
-| expr, parameters
+| expr',' parameters
 ;
 
 cond_stmt :
-	if ( expr block (else block)?)
-| switch (id) of: '{' (case int_const: (block)*)* default: block '}'
+	if '(' expr ')' block (else block)?
+| switch '(' id ')' of':' '{' (case int_const':' (block)*)* default':' block '}'
 ;
 
 loop_stmt :
-	for ( (var_dcl)? ; expr ; (assignment | expr)? ) block
-| repeat block until ( expr );
-| foreach ( id in id ) block
+	for '(' (var_dcl)? ';' expr ';' (assignment | expr)? ')' block
+| repeat block until '(' expr ')'';'
+| foreach '(' id in id ')' block
 ;
 
 goto :
@@ -99,26 +104,26 @@ goto :
 ;
 
 label :
-	id:
+	id':'
 ;
 
 expr :
 	expr binary_op expr
-| ( expr )
+| '(' expr ')'
 | method_call
 | variable
 | const_vall
-| - expr
-| ! expr
+| '-' expr
+| '!' expr
 ;
 
 variable :
 	id (( '[' expr ']' )+)? ('.' variable)?
 | '~'variable
-| -- variable
-| ++ variable
-| variable--
-| variable++
+| '--' variable
+| '++' variable
+| variable'--'
+| variable'++'
 ;
 
 binary_op :
@@ -127,25 +132,25 @@ binary_op :
 ;
 
 arithmatic :
-	+
-| -
-| *
-| /
-| %
-| &
-| |
-| ^
+	'+'
+| '-'
+| '*'
+| '/'
+| '%'
+| '&'
+| '|'
+| '^'
 | '||'
 | '&&'
 ;
 
 conditionl :
-	==
-| !=
-| >=
-| <=
-| <
-| >
+	'=='
+| '!='
+| '>='
+| '<='
+| '<'
+| '>'
 ;
 
 const_val :
