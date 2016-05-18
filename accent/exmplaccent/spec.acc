@@ -16,12 +16,12 @@ func_proc :
 ;
 
 func_dcl :
-	type id '(' (arguments)? ')' ';'
+	type id '(' (arguments)? ')' SEMICOLON
 | type id '(' (arguments)? ')' block
 ;
 
 extern_dcl :
-	extern type id';'
+	extern type idSEMICOLON
 ;
 
 arguments :
@@ -29,7 +29,7 @@ arguments :
 ;
 
 proc_dcl :
-	procedure id '(' (arguments)? ')'';'
+	procedure id '(' (arguments)? ')'SEMICOLON
 | procedure id '(' (arguments)? ')' block
 ;
 
@@ -47,11 +47,11 @@ type :
 ;
 
 struct_dec :
-	record id '{'(var_dcl)+'}'';'
+	record id  OPENCURLYBRACE (var_dcl)+ CLOSECURLYBRACE SEMICOLON
 ;
 
 var_dcl :
-	(const)? type var_dcl_cnt ((',' var_dcl_cnt)?)* ';'
+	(const)? type var_dcl_cnt ((',' var_dcl_cnt)?)* SEMICOLON
 ;
 
 var_dcl_cnt :
@@ -59,20 +59,20 @@ var_dcl_cnt :
 ;
 
 block :
-	'{'((var_dcl | statement))*'}'
+	 OPENCURLYBRACE ((var_dcl | statement))* CLOSECURLYBRACE 
 ;
 
 statemetn :
-	assignment';'
-| method_call';'
+	assignmentSEMICOLON
+| method_call SEMICOLON
 | cond_stmt
 | loop_stmt
-| return (expr)?';'
+| return (expr)? SEMICOLON
 | goto;
 | label
 | break;
 | continue;
-| sizeof'(' type ')'';'
+| sizeof'(' type ')'SEMICOLON
 ;
 
 assignment :
@@ -90,12 +90,12 @@ parameters :
 
 cond_stmt :
 	if '(' expr ')' block (else block)?
-| switch '(' id ')' of':' '{' (case int_const':' (block)*)* default':' block '}'
+| switch '(' id ')' of':'  OPENCURLYBRACE  (case int_const':' (block)*)* default':' block  CLOSECURLYBRACE 
 ;
 
 loop_stmt :
-	for '(' (var_dcl)? ';' expr ';' (assignment | expr)? ')' block
-| repeat block until '(' expr ')'';'
+	for '(' (var_dcl)? SEMICOLON expr SEMICOLON (assignment | expr)? ')' block
+| repeat block until '(' expr ')'SEMICOLON
 | foreach '(' id in id ')' block
 ;
 
