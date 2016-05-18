@@ -1,30 +1,158 @@
-%token NUMBER;
-root :
-   expression
-|  null
+%token bool,‬‬ ‫‪break,‬‬ ‫‪case,‬‬ ‫‪char,‬‬ ‫‪const,‬‬ ‫‪continue,‬‬ ‫‪default,‬‬ ‫‪double,‬‬ ‫‪else,‬‬ ‫‪extern,‬‬ ‫‪false,‬‬ ‫function,‬‬ ‫‪float,‬‬ ‫‪for,‬‬ ‫‪goto,‬‬ ‫‪if,‬‬ ‫‪input,‬‬ ‫‪int,‬‬ ‫‪long,‬‬ ‫‪output,‬‬ ‫‪return,‬‬ ‫‪record,‬‬ ‫‪sizeof,‬‬ ‫‪static,‬‬ ‫‪string,‬‬ ‫‪switch,‬‬ ‫‪true‬‬, procedure;
+
+program :
+	((var_dcl)* | ‫(func_proc)* | (struct_dec)*)+
 ;
 
-null :
+func_proc :
+	func_dcl
+| proc_dcl
+| extern_dcl
 ;
 
-expression :
-  term<n> { printf("%d\n", n); }
+func_dcl :
+	type id ((arguments)?);
+| type id ((arguments)?) block
 ;
 
-term<n> :
-  term<x> '+' factor<y> { *n = x+y; }
-| term<x> '-' factor<y> { *n = x-y; }
-| factor<n>
+extern_dcl :
+	extern type id;
 ;
 
-factor<n> :
-  factor<x> '*' primary<y> { *n = x*y; }
-| factor<x> '/' primary<y> { *n = x/y; }
-| primary<n>
+arguments :
+	type id (('['']')*)? (',' arguments)?
 ;
 
-primary<n> :
-  NUMBER<n>
-| '(' term<n> ')'
-| '-' primary<x> { *n = -x;}
+proc_dcl :
+	procedure id ((arguments)?);
+| procedure id ((arguments)?) block
+;
+
+type :
+	int
+| bool
+| float
+| long
+| char
+| double
+| id
+| string
+| void
+| auto
+;
+
+struct_dec :
+	record id '{'(var_dcl)+'}';
+;
+
+var_dcl :
+	(const)? type var_dcl_cnt ((','var_dcl_cnt)?)*;
+;
+
+var_dcl_cnt :
+	variable ('=' expr)?
+;
+
+block :
+	'{'((var_dcl | statement))*'}'
+;
+
+statemetn :
+	assignment;
+| method_call;
+| cond_stmt
+| loop_stmt
+| return (expr)?;
+| goto;
+| label
+| break;
+| continue;
+| sizeof'(' type ')';
+;
+
+assignment :
+	variable '=' expr
+;
+
+method_call :
+	id ((parameters)?)
+;
+
+parameters :
+	expr
+| expr, parameters
+;
+
+cond_stmt :
+	if ( expr block (else block)?)
+| switch (id) of: '{' (case int_const: (block)*)* default: block '}'
+;
+
+loop_stmt :
+	for ( (var_dcl)? ; expr ; (assignment | expr)? ) block
+| repeat block until ( expr );
+| foreach ( id in id ) block
+;
+
+goto :
+	goto id
+;
+
+label :
+	id:
+;
+
+expr :
+	expr binary_op expr
+| ( expr )
+| method_call
+| variable
+| const_vall
+| - expr
+| ! expr
+;
+
+variable :
+	id (( '[' expr ']' )+)? ('.' variable)?
+| '~'variable
+| -- variable
+| ++ variable
+| variable--
+| variable++
+;
+
+binary_op :
+	arithmatic
+| conditional
+;
+
+arithmatic :
+	+
+| -
+| *
+| /
+| %
+| &
+| |
+| ^
+| '||'
+| '&&'
+;
+
+conditionl :
+	==
+| !=
+| >=
+| <=
+| <
+| >
+;
+
+const_val :
+	int_const
+| real_const
+| char_const
+| bool_const
+| string_const
+| long_const
 ;
