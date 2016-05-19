@@ -1,31 +1,192 @@
+%token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
+
 %nodefault
 
-Root:
-   Example1
-|
-   Example2
+null_point :
+
 ;
 
-Example1 :
-   A
-|
-   B
+program :
+  program_parts
+| program_parts program
 ;
 
-A :
-  'x'
+program_parts:
+  var_dcl
+| func_proc
+| struct_dec
 ;
 
-B :
-  'x'
+func_proc :
+  func_dcl
+| proc_dcl
+| extern_dcl
 ;
 
-Example2 :
-   X X
+arguments :
+  argument
+| argument COMMA arguments
 ;
 
-X :
-  'x'
-|
-  'x' 'x'
+array_dcl:
+  null_point
+| OPENINGBRACE CLOSINGBRACE array_dcl
+| OPENINGBRACE INTNUMBER CLOSINGBRACE array_dcl
+;
+
+argument :
+  type ID_CODE array_dcl
+;
+
+func_dcl :
+  type ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
+| type ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+;
+
+extern_dcl :
+  EXTERN type ID_CODE SEMICOLON
+;
+
+proc_dcl :
+  PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
+| PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+;
+
+type :
+  INT
+| BOOLEAN
+| FLOAT
+| LONG
+| CHARKEYWORD
+| DOUBLE
+| ID_CODE
+| STRINGKEYWORD
+| VOID
+| AUTO
+;
+
+var_dcl:
+  ( CONST )? type var_dcl_cnts SEMICOLON 
+;
+
+var_dcl_cnts:
+  var_dcl_cnt
+| var_dcl_cnt COMMA var_dcl_cnts
+;
+    
+var_dcl_cnt:
+  variable
+| ASSIGNMENT expr
+;
+
+struct_dec:
+  RECORD ID_CODE OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
+;
+
+block :
+  OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE 
+;
+
+arithmatic :
+  ADDUNARYPLUS
+| SUBUNARYMINUS
+| PRODUCTION
+| DIV
+| MOD
+| ARITHMETICAND
+| ARITHMETICOR
+| XOR
+| LOGICALOR
+| LOGICALAND
+;
+
+conditional :
+  EQUAL
+| NOTEQUAL
+| BIGGEROREQUAL
+| LESSOREQUAL
+| LESSTHAN
+| BIGGERTHAN
+;
+
+binary_op :
+  arithmatic
+| conditional
+;
+
+parameters :
+  expr
+| expr COMMA parameters
+;
+
+method_call_expr :
+  ID_CODE OPENINGPAREBTHESIS ( parameters )? CLOSINGPAREBTHESIS
+;
+
+array_complete_dcl :
+  OPENINGBRACE expr CLOSINGBRACE array_complete_dcl
+| OPENINGBRACE expr CLOSINGBRACE
+;
+
+variable :
+  ID_CODE ( COMMA variable )?
+| ID_CODE array_complete_dcl
+| DECREMENT variable
+| INCREMENT variable
+| variable DECREMENT
+| variable INCREMENT
+;
+
+const_val :
+  INTNUMBER
+| REALNUMBER
+| CHAR
+| BOOLEAN
+| STRING
+;
+
+assignment_expr :
+  variable ASSIGNMENT expr
+;
+
+loop_stmt :
+  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( assignment_expr | expr )? CLOSINGPAREBTHESIS block
+| REPEAT block UNTIL OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS SEMICOLON
+| FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
+;
+
+expr :
+  expr binary_op expr
+| OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
+| method_call_expr
+| variable
+| const_val
+| SUBUNARYMINUS expr
+| NOT expr
+;
+
+cond_statement :
+  IF OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS block ( ELSE block )?
+| SWITCH OPENCURLYBRACE ID_CODE CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER COLON ( block )* )* DEFAULT COLON block CLOSECURLYBRACE
+;
+
+gotofunc :
+  GOTO ID_CODE
+;
+
+labeltoken :
+  ID_CODE COLON
+;
+
+statement_expr :
+  assignment_expr SEMICOLON
+| cond_statement
+| loop_stmt
+| method_call_expr SEMICOLON
+| RETURN ( expr )? SEMICOLON
+| gotofunc SEMICOLON
+| labeltoken
+| BREAK SEMICOLON
+| CONTINUE SEMICOLON
+| SIZEOF OPENINGPAREBTHESIS type CLOSINGPAREBTHESIS SEMICOLON
 ;

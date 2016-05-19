@@ -6,7 +6,175 @@
 DIGIT [0-9]
 VARIABLE [a-zA-Z]+[0-9]*
 
+ID = (([a-zA-Z]+[0-9]*)(_{0,2}([a-zA-Z]|[0-9])+)*)|(_{1,2}([a-zA-Z]|[0-9])+(_{0,2}([a-zA-Z]|[0-9])+)*)
+
+BOOLKEY = bool
+BREAKKEY = break
+CASEKEY = case
+CHARKEY = char
+CONSTKEY = const
+CONTINUEKEY = continue
+DEFAULTKEY = default
+DOUBLEKEY = double
+ELSEKEY = else
+EXTERNKEY = extern
+FUNCTIONKEY = function
+FLOATKEY = float
+FORKEY = for
+GOTOKEY = goto
+IFKEY = if
+INPUTKEY = input
+INTKEY = int
+LONGKEY = long
+OUTPUTKEY = output
+RETURNKEY = return
+SZIEOFKEY = sizeof
+STATICKEY = static
+STRINGKEY = string
+SWITChKEY = switch
+VOIDKEY = void
+UNTILKEY = until
+RECORDKEY = record
+REPEATKEY = repeat 
+PROCEDUREKEY = procedure
+FOREACHKEY = foreach
+AUTOKEY = auto
+OFKEY = of
+INKEY = in
+
 %%
+
+{AUTOKEY} {
+	return AUTO;
+}
+
+{BOOLKEY} {
+	return BOOLEAN;
+}
+
+{BREAKKEY} {
+	return BREAK;
+}
+
+{CASEKEY} {
+	return CASE;
+}
+
+{CHARKEY} {
+	return CHARKEYWORD;
+}
+
+{CONSTKEY} {
+	return CONST;
+}
+
+{CONTINUEKEY} {
+	return CONTINUE;
+}
+
+{DEFAULTKEY} {
+	return DEFAULT;
+}
+
+{DOUBLEKEY} {
+	return DOUBLE;
+}
+
+{ELSEKEY} {
+	return ELSE;
+}
+
+{EXTERNKEY} {
+	return EXTERN;
+}
+
+{FUNCTIONKEY} {
+	return FUNCTION;
+}
+
+{FLOATKEY} {
+	return FLOAT;
+}
+
+{FOREACHKEY} {
+	return FOREACH;
+}
+
+{FORKEY} {
+	return FOR;
+}
+
+{GOTOKEY} {
+	return GOTO;
+}
+
+{IFKEY} {
+	return IF;
+}
+
+{INPUTKEY} {
+	return INPUT;
+}
+
+{INTKEY} {
+	return INT;
+}
+
+{INKEY} {
+	return IN;
+}
+
+{LONGKEY} {
+	return LONG;
+}
+
+{OFKEY} {
+	return OF;
+}
+
+{OUTPUTKEY} {
+	return OUTPUT;
+}
+
+{PROCEDUREKEY} {
+	return PROCEDURE;
+}
+
+{RECORDKEY} {
+	return RECORD;
+}
+
+{REPEATKEY} {
+	return REPEAT;
+}
+
+{RETURNKEY} {
+	return RETURN;
+}
+
+{SZIEOFKEY} {
+	return SIZEOF;
+}
+
+{STATICKEY} {
+	return STATIC;
+}
+
+{STRINGKEY} {
+	return STRINGKEYWORD;
+}
+
+{SWITChKEY} {
+	return SWITCH;
+}
+
+{UNTILKEY} {
+	return UNTIL;
+}
+
+{VOIDKEY} {
+	return VOID;
+}
 
 "\'"."\'" {
 	yylval.charval = (char)(yytext);
@@ -18,62 +186,12 @@ VARIABLE [a-zA-Z]+[0-9]*
 	return STRING;
 }
 
-"/@" {
-			lineNumbers[j] = yylineno;
-			j++;
-			BEGIN (COMMENT);
+{SINGLELINECOMMENT} {
+	/* IGNORING COMMENTS */
 }
 
-<COMMENT>"@/" {
-			outputFile << "line ";
-			for (int k = 0; lineNumbers[k] != 0; k++)
-			{
-				outputFile << lineNumbers[k] << "-" ;
-			}
-			outputFile << yylineno;
-			outputFile << ": " << "comment " << "\"";
-			for (int k = 0; comments[k].compare("$") != 0 ; k++)
-			{
-				outputFile << comments[k];
-			}
-			outputFile << "\"" << endl;
-
-
-			i = j = 0;
-			for (int k = 0; k < 100 ; k++)
-				lineNumbers[k] = 0;
-
-			for (int k = 0; k < 100 ; k++)
-				comments[k] = "$";
-
-			BEGIN 0;
-}
-
-<COMMENT>. {
-			const char *s = yytext;
-			string str(s);
-			comments[i] = s;
-			i++;
-}
-
-<COMMENT>[\n] {
-			const char *s = yytext;
-			string str(s);
-			comments[i] = s;
-			lineNumbers[j] = yylineno;
-			i++;
-			j++;
-}
-
-
-"@@".* {
-			const char *s = yytext;
-			string str(s);
-			outputFile << "line " << yylineno << ": " << "comment " << "\"" << yytext << "\"" << endl;
-}
-
-"bool" {
-	return BOOL;
+{MULTILINECOMMENT} {
+	/* IGNORING COMMENTS */
 }
 
 "true" {
@@ -86,19 +204,24 @@ VARIABLE [a-zA-Z]+[0-9]*
 	return FALSEV;
 }
 
+{ID} {
+	yylval.stringval = yytext;
+	return ID_CODE;
+}
+
 [-+]?{DIGIT}+ {
 	yylval.intval = atoi(yytext);
-	return NUMBER;
+	return INTNUMBER;
 }
 
 [-+]?0[xX][0-9a-fA-F]+ {
 	yylval.intval = atoi(yytext);
-	return NUMBER;
+	return INTNUMBER;
 }
 
 [-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)? {
 	yylval.floatval = atof(yytext);
-	return NUMBER;
+	return REALNUMBER;
 }
 
 [ \t] {
@@ -107,11 +230,6 @@ VARIABLE [a-zA-Z]+[0-9]*
 
 \n {
 	yypos++;
-}
-
-_?{VARIABLE}_?*{VARIABLE}* {
-			outputFile << "line " << yylineno << ": " << "id " << "\"" << yytext << "\"" << endl;
-			return ID_CODE;
 }
 
 "!=" {
