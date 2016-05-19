@@ -208,3 +208,50 @@ WriteOutput(char* input) {
 
 	fclose(fp);
 }
+
+char* GetSizeOf(char* input)
+{
+	char* status = "0";
+
+	if (strcmp(input, "int") == 0)
+	{
+		status = "2";
+	}
+	else if (strcmp(input, "bool") == 0)
+	{
+		status = "2";
+	}
+	else if (strcmp(input, "float") == 0)
+	{
+		status = "4";
+	}
+	else if (strcmp(input, "long") == 0)
+	{
+		status = "4";
+	}
+	else if (strcmp(input, "char") == 0)
+	{
+		status = "1";
+	}
+	else if (strcmp(input, "double") == 0)
+	{
+		status = "8";
+	}
+	else if (strcmp(input, "string") == 0)
+	{
+		status = "12";
+	}
+	else if (strcmp(input, "void") == 0)
+	{
+		status = "0";
+	}
+	else if (strcmp(input, "auto") == 0)
+	{
+		status = "2";
+	}
+	else
+	{
+		status = "12";
+	}
+	return status;
+}

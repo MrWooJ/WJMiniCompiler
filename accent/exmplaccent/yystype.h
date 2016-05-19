@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 typedef union {
 	int intval;
 	float floatval;

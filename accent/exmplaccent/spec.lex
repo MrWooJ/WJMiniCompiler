@@ -44,135 +44,135 @@ INKEY = in
 
 %%
 
-{AUTOKEY} {
+AUTOKEY {
 	return AUTO;
 }
 
-{BOOLKEY} {
+BOOLKEY {
 	return BOOLEAN;
 }
 
-{BREAKKEY} {
+BREAKKEY {
 	return BREAK;
 }
 
-{CASEKEY} {
+CASEKEY {
 	return CASE;
 }
 
-{CHARKEY} {
+CHARKEY {
 	return CHARKEYWORD;
 }
 
-{CONSTKEY} {
+CONSTKEY {
 	return CONST;
 }
 
-{CONTINUEKEY} {
+CONTINUEKEY {
 	return CONTINUE;
 }
 
-{DEFAULTKEY} {
+DEFAULTKEY {
 	return DEFAULT;
 }
 
-{DOUBLEKEY} {
+DOUBLEKEY {
 	return DOUBLE;
 }
 
-{ELSEKEY} {
+ELSEKEY {
 	return ELSE;
 }
 
-{EXTERNKEY} {
+EXTERNKEY {
 	return EXTERN;
 }
 
-{FUNCTIONKEY} {
+FUNCTIONKEY {
 	return FUNCTION;
 }
 
-{FLOATKEY} {
+FLOATKEY {
 	return FLOAT;
 }
 
-{FOREACHKEY} {
+FOREACHKEY {
 	return FOREACH;
 }
 
-{FORKEY} {
+FORKEY {
 	return FOR;
 }
 
-{GOTOKEY} {
+GOTOKEY {
 	return GOTO;
 }
 
-{IFKEY} {
+IFKEY {
 	return IF;
 }
 
-{INPUTKEY} {
+INPUTKEY {
 	return INPUT;
 }
 
-{INTKEY} {
+INTKEY {
 	return INT;
 }
 
-{INKEY} {
+INKEY {
 	return IN;
 }
 
-{LONGKEY} {
+LONGKEY {
 	return LONG;
 }
 
-{OFKEY} {
+OFKEY {
 	return OF;
 }
 
-{OUTPUTKEY} {
+OUTPUTKEY {
 	return OUTPUT;
 }
 
-{PROCEDUREKEY} {
+PROCEDUREKEY {
 	return PROCEDURE;
 }
 
-{RECORDKEY} {
+RECORDKEY {
 	return RECORD;
 }
 
-{REPEATKEY} {
+REPEATKEY {
 	return REPEAT;
 }
 
-{RETURNKEY} {
+RETURNKEY {
 	return RETURN;
 }
 
-{SZIEOFKEY} {
+SZIEOFKEY {
 	return SIZEOF;
 }
 
-{STATICKEY} {
+STATICKEY {
 	return STATIC;
 }
 
-{STRINGKEY} {
+STRINGKEY {
 	return STRINGKEYWORD;
 }
 
-{SWITChKEY} {
+SWITChKEY {
 	return SWITCH;
 }
 
-{UNTILKEY} {
+UNTILKEY {
 	return UNTIL;
 }
 
-{VOIDKEY} {
+VOIDKEY {
 	return VOID;
 }
 
@@ -186,11 +186,11 @@ INKEY = in
 	return STRING;
 }
 
-{SINGLELINECOMMENT} {
+SINGLELINECOMMENT {
 	/* IGNORING COMMENTS */
 }
 
-{MULTILINECOMMENT} {
+MULTILINECOMMENT {
 	/* IGNORING COMMENTS */
 }
 
@@ -204,7 +204,7 @@ INKEY = in
 	return FALSEV;
 }
 
-{ID} {
+ID {
 	yylval.stringval = yytext;
 	return ID_CODE;
 }

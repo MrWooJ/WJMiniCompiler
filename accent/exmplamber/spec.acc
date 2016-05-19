@@ -24,7 +24,8 @@ func_proc :
 ;
 
 arguments :
-  argument
+  null_point
+| argument
 | argument COMMA arguments
 ;
 
@@ -85,6 +86,22 @@ struct_dec:
 
 block :
   OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE 
+;
+
+arithmatic_low_level :
+  ADDUNARYPLUS
+| SUBUNARYMINUS
+;
+
+arithmatic_high_level :
+  PRODUCTION
+| DIV
+| MOD
+| ARITHMETICAND
+| ARITHMETICOR
+| XOR
+| LOGICALOR
+| LOGICALAND
 ;
 
 arithmatic :
@@ -155,8 +172,25 @@ loop_stmt :
 | FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
 ;
 
+term<n> :
+  term<x> arithmatic_low_level factor<y> {}
+| factor<n>
+;
+
+factor<n> :
+  factor<x> arithmatic_high_level primary<y> {}
+| primary<n>
+;
+
+primary<n> :
+  INTNUMBER<n>
+| REALNUMBER<n>
+| OPENINGPAREBTHESIS term<n> CLOSINGPAREBTHESIS
+;
+
 expr :
-  expr binary_op expr
+  term<n>
+| expr conditional expr
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
 | variable

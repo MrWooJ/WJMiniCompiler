@@ -23,13 +23,14 @@ program_parts:
 ;
 
 func_proc :
-  func_dcl
+  func_dcl<x> { HandleCodeGenerator("END", x, "", ""); }
 | proc_dcl
 | extern_dcl
 ;
 
 arguments :
-  argument
+  null_point
+| argument
 | argument COMMA arguments
 ;
 
@@ -40,12 +41,12 @@ array_dcl:
 ;
 
 argument :
-  type ID_CODE array_dcl
+  type<x> ID_CODE<y> array_dcl { char* size = GetSizeOf(x); HandleCodeGenerator("ARG", y, size, ""); }
 ;
 
 func_dcl :
-  type ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
-| type ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+  type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
+| type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
 ;
 
 extern_dcl :
@@ -57,17 +58,17 @@ proc_dcl :
 | PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
 ;
 
-type :
-  INT
-| BOOLEAN
-| FLOAT
-| LONG
-| CHARKEYWORD
-| DOUBLE
-| ID_CODE
-| STRINGKEYWORD
-| VOID
-| AUTO
+type<n> :
+  INT {*n = "int"}
+| BOOLEAN {*n = "bool"}
+| FLOAT {*n = "float"}
+| LONG {*n = "long"}
+| CHARKEYWORD {*n = "char"}
+| DOUBLE {*n = "double"}
+| ID_CODE<m> {*n = m} 
+| STRINGKEYWORD {*n = "string"}
+| VOID {*n = "void"}
+| AUTO {*n = "auto"}
 ;
 
 var_dcl:
@@ -90,6 +91,22 @@ struct_dec:
 
 block :
   OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE 
+;
+
+arithmatic_low_level :
+  ADDUNARYPLUS
+| SUBUNARYMINUS
+;
+
+arithmatic_high_level :
+  PRODUCTION
+| DIV
+| MOD
+| ARITHMETICAND
+| ARITHMETICOR
+| XOR
+| LOGICALOR
+| LOGICALAND
 ;
 
 arithmatic :
@@ -160,8 +177,25 @@ loop_stmt :
 | FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
 ;
 
+term<n> :
+  term<x> arithmatic_low_level factor<y> {}
+| factor<n>
+;
+
+factor<n> :
+  factor<x> arithmatic_high_level primary<y> {}
+| primary<n>
+;
+
+primary<n> :
+  INTNUMBER<n>
+| REALNUMBER<n>
+| OPENINGPAREBTHESIS term<n> CLOSINGPAREBTHESIS
+;
+
 expr :
-  expr binary_op expr
+  term<n>
+| expr conditional expr
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
 | variable
