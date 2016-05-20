@@ -5,6 +5,14 @@
 int arrDecNumber = 0;
 int arrDecProduction = 1;
 
+int arrCmptProduction = 1;
+
+Array parametersArray;
+
+char* variableType;
+
+int useOfArrayVar = 0;
+
 }
 	 
 %token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
@@ -33,7 +41,6 @@ func_proc :
 ;
 
 arguments :
-  null_point
 | argument
 | argument COMMA arguments
 ;
@@ -78,7 +85,7 @@ type<n> :
 
 var_dcl:
   %prelude { int i = 0; }
-  ( CONST { i = 1; } )? type<x> var_dcl_cnts SEMICOLON { }
+  ( CONST { i = 1; } )? type<x> { variableType = x; } var_dcl_cnts SEMICOLON { }
 ;
 
 var_dcl_cnts:
@@ -87,8 +94,8 @@ var_dcl_cnts:
 ;
     
 var_dcl_cnt:
-  variable
-| ASSIGNMENT expr
+  variable<x> { size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x, ""); } else { HandleCodeGenerator("VAR", size, arrCmptProduction, x); arrCmptProduction = 1; useOfArrayVar = 0; } }
+| assignment_expr 
 ;
 
 struct_dec:
@@ -99,66 +106,67 @@ block :
   OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE 
 ;
 
-arithmatic_low_level :
-  ADDUNARYPLUS
-| SUBUNARYMINUS
+arithmatic_low_level<n> :
+  ADDUNARYPLUS<x> {*n = x}
+| SUBUNARYMINUS<x> {*n = x}
 ;
 
-arithmatic_high_level :
-  PRODUCTION
-| DIV
-| MOD
-| ARITHMETICAND
-| ARITHMETICOR
-| XOR
-| LOGICALOR
-| LOGICALAND
+arithmatic_high_level<n> :
+  PRODUCTION<x> {*n = x}
+| DIV<x> {*n = x}
+| MOD<x> {*n = x}
+| ARITHMETICAND<x> {*n = x}
+| ARITHMETICOR<x> {*n = x}
+| XOR<x> {*n = x}
+| LOGICALOR<x> {*n = x}
+| LOGICALAND<x> {*n = x}
 ;
 
-arithmatic :
-  ADDUNARYPLUS
-| SUBUNARYMINUS
-| PRODUCTION
-| DIV
-| MOD
-| ARITHMETICAND
-| ARITHMETICOR
-| XOR
-| LOGICALOR
-| LOGICALAND
+arithmatic<n> :
+  ADDUNARYPLUS<x> {*n = x}
+| SUBUNARYMINUS<x> {*n = x}
+| PRODUCTION<x> {*n = x}
+| DIV<x> {*n = x}
+| MOD<x> {*n = x}
+| ARITHMETICAND<x> {*n = x}
+| ARITHMETICOR<x> {*n = x}
+| XOR<x> {*n = x}
+| LOGICALOR<x> {*n = x}
+| LOGICALAND<x> {*n = x}
 ;
 
-conditional :
-  EQUAL
-| NOTEQUAL
-| BIGGEROREQUAL
-| LESSOREQUAL
-| LESSTHAN
-| BIGGERTHAN
+conditional<n> :
+  EQUAL<x> {*n = x}
+| NOTEQUAL<x> {*n = x}
+| BIGGEROREQUAL<x> {*n = x}
+| LESSOREQUAL<x> {*n = x}
+| LESSTHAN<x> {*n = x}
+| BIGGERTHAN<x> {*n = x}
 ;
 
-binary_op :
-  arithmatic
-| conditional
+binary_op<n> :
+  arithmatic<x> {*n = x}
+| conditional<x> {*n = x}
 ;
 
-parameters :
-  expr
-| expr COMMA parameters
+parameters<n> :
+  expr<x> { insertArray(&parametersArray, x); *n = ProduceParameters(&parametersArray); freeArray(&parametersArray); }
+| expr<x> { insertArray(&parametersArray, x); } COMMA parameters
 ;
 
 method_call_expr :
-  ID_CODE OPENINGPAREBTHESIS ( parameters )? CLOSINGPAREBTHESIS
+	%prelude { int hasParameters = 0; }
+  ID_CODE<x> OPENINGPAREBTHESIS ( { initArray(&parametersArray, 5); } parameters<y> { hasParameters = 1; } )? CLOSINGPAREBTHESIS { if(hasParameters == 0) { HandleCodeGenerator("CALL",x,"",""); } else { HandleCodeGenerator("CALL",x,y,""); } }
 ;
 
-array_complete_dcl :
-  OPENINGBRACE expr CLOSINGBRACE array_complete_dcl
-| OPENINGBRACE expr CLOSINGBRACE
+array_complete_dcl<n> :
+  OPENINGBRACE expr<x> CLOSINGBRACE { *n = arrCmptProduction * x; }
+| OPENINGBRACE expr<x> CLOSINGBRACE { arrCmptProduction = arrCmptProduction * x; } array_complete_dcl<y> 
 ;
 
-variable :
-  ID_CODE ( COMMA variable )?
-| ID_CODE array_complete_dcl
+variable<n> :
+  ID_CODE<x> { *n = x; }
+| ID_CODE<x> array_complete_dcl<y> { useOfArrayVar = 1; *n = x; }
 | DECREMENT variable
 | INCREMENT variable
 | variable DECREMENT
@@ -173,34 +181,39 @@ const_val<n> :
 | STRING<x> { *n = x; }
 ;
 
-assignment_expr :
-  variable ASSIGNMENT expr
+assignment_expr<n> :
+  variable<x> ASSIGNMENT expr<y> { HandleCodeGenerator("=",x,y,""); }
+;
+
+expr_assign:
+  expr 
+| assignment_expr
 ;
 
 loop_stmt :
-  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( assignment_expr | expr )? CLOSINGPAREBTHESIS block
+  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( expr_assign )? CLOSINGPAREBTHESIS block
 | REPEAT block UNTIL OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS SEMICOLON
 | FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
 ;
 
 term<n> :
-  term<x> arithmatic_low_level factor<y> {}
-| factor<n>
+  term<x> arithmatic_low_level factor<y> {} ( arithmatic_low_level term<z> )?
+| factor<x>
 ;
 
 factor<n> :
   factor<x> arithmatic_high_level primary<y> {}
-| primary<n>
+| primary<x> { *n = x; }
 ;
 
 primary<n> :
-  INTNUMBER<n>
-| REALNUMBER<n>
-| OPENINGPAREBTHESIS term<n> CLOSINGPAREBTHESIS
+  INTNUMBER<x> { *n = x; }
+| REALNUMBER<x> { *n = x; }
+| OPENINGPAREBTHESIS term<x> CLOSINGPAREBTHESIS
 ;
 
-expr :
-  term<n>
+expr<n> :
+  term<x>
 | expr conditional expr
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
@@ -228,7 +241,7 @@ statement_expr :
 | cond_statement
 | loop_stmt
 | method_call_expr SEMICOLON
-| RETURN ( expr )? SEMICOLON
+| RETURN { int i = 0; }( expr<x> { i = 1; })? SEMICOLON { if(i == 0) { HandleCodeGenerator("RET",x,"",""); } else HandleCodeGenerator("RET","","",""); };
 | gotofunc SEMICOLON
 | labeltoken
 | BREAK SEMICOLON

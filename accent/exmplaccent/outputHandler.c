@@ -1,6 +1,26 @@
 #include <stdio.h>
 #include "outputHandler.h"
 
+int i = 0;
+
+char* ProduceTempVar()
+{
+	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(itoa(i)) );
+	strcpy(str3, "$t");
+	strcat(str3, itoa(i));
+	i=i+1;
+	return str3;
+}
+
+char* UseOfTempVar()
+{
+	i--;
+	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(itoa(i)) );
+	strcpy(str3, "$t");
+	strcat(str3, itoa(i));
+	return str3;
+}
+
 char* Concat2Strings(char* str1, char* str2)
 {
 	char* str3 = (char *) malloc( 1 + strlen(str1)+ strlen(str2) );
@@ -182,7 +202,15 @@ HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 	}
 	else if (strcmp(command, "CALL") == 0)
 	{
-		res = Concat3Strings("CALL ",op1,op2);
+		if(strcmp(op2,"") == 0)
+		{
+			res = Concat2Strings("CALL ",op1);
+		}
+		else
+		{
+			res = Concat3Strings("CALL ",op1,op2);
+		}
+		
 	}
 	else
 	{
@@ -254,4 +282,33 @@ char* GetSizeOf(char* input)
 		status = "12";
 	}
 	return status;
+}
+
+void initArray(Array *a, size_t initialSize) {
+  a->array = (char* *)malloc(initialSize * sizeof(char*));
+  a->used = 0;
+  a->size = initialSize;
+}
+
+void insertArray(Array *a, char* element) {
+  if (a->used == a->size) {
+    a->size *= 2;
+    a->array = (char* *)realloc(a->array, a->size * sizeof(char*));
+  }
+  a->array[a->used++] = element;
+}
+
+void freeArray(Array *a) {
+  free(a->array);
+  a->array = NULL;
+  a->used = a->size = 0;
+}
+
+char* ProduceParameters(Array *a)
+{
+	int i = 0;
+	char* res = "";
+	for (i = 0; i < a->size; i++)
+		res = Concat2Strings(res,a->array[i]);
+	return res;
 }
