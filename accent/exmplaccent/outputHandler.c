@@ -2,6 +2,7 @@
 #include "outputHandler.h"
 
 int i = 0;
+int j = 0;
 
 char* ProduceTempVar()
 {
@@ -18,6 +19,24 @@ char* UseOfTempVar()
 	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(itoa(i)) );
 	strcpy(str3, "$t");
 	strcat(str3, itoa(i));
+	return str3;
+}
+
+char* ProduceBlockLabel()
+{
+	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(itoa(j)) );
+	strcpy(str3, "BLK");
+	strcat(str3, itoa(j));
+	j=j+1;
+	return str3;
+}
+
+char* UseOfBlockLabel()
+{
+	j--;
+	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(itoa(j)) );
+	strcpy(str3, "BLK");
+	strcat(str3, itoa(j));
 	return str3;
 }
 

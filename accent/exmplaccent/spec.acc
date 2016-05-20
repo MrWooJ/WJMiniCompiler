@@ -94,7 +94,7 @@ var_dcl_cnts:
 ;
     
 var_dcl_cnt:
-  variable<x> { size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x, ""); } else { HandleCodeGenerator("VAR", size, arrCmptProduction, x); arrCmptProduction = 1; useOfArrayVar = 0; } }
+  variable<x> { size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x, ""); } else { HandleCodeGenerator("ARR", size, arrCmptProduction, x); arrCmptProduction = 1; useOfArrayVar = 0; } }
 | assignment_expr 
 ;
 
@@ -102,8 +102,8 @@ struct_dec:
   RECORD ID_CODE OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
 ;
 
-block :
-  OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE 
+block<n> :
+  OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE { *n = ProduceBlockLabel(); }
 ;
 
 arithmatic_low_level<n> :
@@ -182,7 +182,7 @@ const_val<n> :
 ;
 
 assignment_expr<n> :
-  variable<x> ASSIGNMENT expr<y> { HandleCodeGenerator("=",x,y,""); }
+  variable<x> ASSIGNMENT expr<%in x, %out y> { HandleCodeGenerator("=",x,y,""); }
 ;
 
 expr_assign:
@@ -196,13 +196,13 @@ loop_stmt :
 | FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
 ;
 
-term<n> :
-  term<x> arithmatic_low_level factor<y> {} ( arithmatic_low_level term<z> )?
-| factor<x>
+term<m,n> :
+  term<x> arithmatic_low_level<y> factor<m,y> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
+| factor<m,x>
 ;
 
-factor<n> :
-  factor<x> arithmatic_high_level primary<y> {}
+factor<m,n> :
+  factor<x> arithmatic_high_level<y> primary<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
 | primary<x> { *n = x; }
 ;
 
@@ -212,28 +212,28 @@ primary<n> :
 | OPENINGPAREBTHESIS term<x> CLOSINGPAREBTHESIS
 ;
 
-expr<n> :
-  term<x>
+expr<%in m, %out n> :
+  term<m,x>
 | expr conditional expr
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
-| variable
+| variable<x> { *n = x; }
 | const_val
 | SUBUNARYMINUS expr
 | NOT expr
 ;
 
 cond_statement :
-  IF OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS block ( ELSE block )?
-| SWITCH OPENCURLYBRACE ID_CODE CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER COLON ( block )* )* DEFAULT COLON block CLOSECURLYBRACE
+  IF OPENINGPAREBTHESIS expr<x> CLOSINGPAREBTHESIS block<y> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JNZ",blockLabel,x,""); } ( ELSE block<z> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JZ",blockLabel,z,""); } )?
+| SWITCH OPENCURLYBRACE ID_CODE<x> CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER<y> COLON block<z> )* DEFAULT COLON block CLOSECURLYBRACE
 ;
 
 gotofunc :
-  GOTO ID_CODE
+  GOTO ID_CODE<x> { HandleCodeGenerator("JMP",x,"",""); }
 ;
 
 labeltoken :
-  ID_CODE COLON
+  ID_CODE<x> COLON { HandleCodeGenerator("LB",x,"",""); }
 ;
 
 statement_expr :
