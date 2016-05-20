@@ -13,6 +13,9 @@ char* variableType;
 
 int useOfArrayVar = 0;
 
+int = useOfResVar = 0;
+char* VariableName;
+
 }
 	 
 %token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
@@ -182,7 +185,7 @@ const_val<n> :
 ;
 
 assignment_expr<n> :
-  variable<x> ASSIGNMENT expr<%in x, %out y> { HandleCodeGenerator("=",x,y,""); }
+  variable<x> { useOfResVar = 1; VariableName = x; } ASSIGNMENT expr<y> { HandleCodeGenerator("=",x,y,""); useOfResVar = 0; }
 ;
 
 expr_assign:
@@ -196,12 +199,12 @@ loop_stmt :
 | FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
 ;
 
-term<m,n> :
-  term<x> arithmatic_low_level<y> factor<m,y> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
-| factor<m,x>
+term<n> :
+  term<x> arithmatic_low_level<y> factor<y> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
+| factor<x>
 ;
 
-factor<m,n> :
+factor<n> :
   factor<x> arithmatic_high_level<y> primary<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
 | primary<x> { *n = x; }
 ;
@@ -212,8 +215,8 @@ primary<n> :
 | OPENINGPAREBTHESIS term<x> CLOSINGPAREBTHESIS
 ;
 
-expr<%in m, %out n> :
-  term<m,x>
+expr<n> :
+  term<x>
 | expr conditional expr
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
