@@ -204,7 +204,7 @@ term<n> :
 | factor<x>
 ;
 
-factor<n> :
+factor<n> { factorCounter++; } :
   factor<x> arithmatic_high_level<y> primary<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
 | primary<x> { *n = x; }
 ;
