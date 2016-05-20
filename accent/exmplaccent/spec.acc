@@ -1,6 +1,10 @@
 %prelude {
 #include "yystype.h"
 #include "outputHandler.h"
+
+int arrDecNumber = 0;
+int arrDecProduction = 1;
+
 }
 	 
 %token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
@@ -34,19 +38,20 @@ arguments :
 | argument COMMA arguments
 ;
 
-array_dcl:
-  null_point
-| OPENINGBRACE CLOSINGBRACE array_dcl
-| OPENINGBRACE INTNUMBER CLOSINGBRACE array_dcl
+array_dcl<n> :
+	%prelude { int simpleArray = 1; }
+  null_point { if (arrDecNumber == 0) { *n = 0; } else { if (simpleArray == 1) { *n = 1; } else {*n = arrDecProduction; arrDecProduction = 1; } } arrDecNumber = 0; }
+| OPENINGBRACE CLOSINGBRACE { arrDecNumber++; simpleArray = 1; } array_dcl
+| OPENINGBRACE INTNUMBER<x> CLOSINGBRACE { arrDecNumber++;  simpleArray = 0; arrDecProduction*= x; } array_dcl
 ;
 
 argument :
-  type<x> ID_CODE<y> array_dcl { char* size = GetSizeOf(x); HandleCodeGenerator("ARG", y, size, ""); }
+  type<x> ID_CODE<y> array_dcl<z> { char* size; if (z == 0) { size = GetSizeOf(x); HandleCodeGenerator("ARG", size, y, ""); } else { size = GetSizeOf(x); char* arrSzie = itoa(z); HandleCodeGenerator("ARG", size, arrSize, y); } }
 ;
 
-func_dcl :
-  type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
-| type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+func_dcl<n> :
+  type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON { *n = y }
+| type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block { *n = y }
 ;
 
 extern_dcl :
@@ -72,7 +77,8 @@ type<n> :
 ;
 
 var_dcl:
-  ( CONST )? type var_dcl_cnts SEMICOLON 
+  %prelude { int i = 0; }
+  ( CONST { i = 1; } )? type<x> var_dcl_cnts SEMICOLON { }
 ;
 
 var_dcl_cnts:
@@ -159,12 +165,12 @@ variable :
 | variable INCREMENT
 ;
 
-const_val :
-  INTNUMBER
-| REALNUMBER
-| CHAR
-| BOOLEAN
-| STRING
+const_val<n> :
+  INTNUMBER<x> { *n = x; }
+| REALNUMBER<x> { *n = x; }
+| CHAR<x> { *n = x; }
+| BOOLEAN<x> { *n = x; }
+| STRING<x> { *n = x; }
 ;
 
 assignment_expr :
