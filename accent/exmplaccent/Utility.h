@@ -21,4 +21,6 @@ void freeArray(Array *a);
 
 char* ProduceParameters(Array *a);
 
+char* Int2String(int a);
+
 #endif

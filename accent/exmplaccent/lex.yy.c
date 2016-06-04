@@ -1210,7 +1210,7 @@ case 38:
 YY_RULE_SETUP
 #line 198 "spec.lex"
 {
-	yylval = true;
+	yylval = 1;
 	return TRUEV;
 }
 	YY_BREAK
@@ -1218,7 +1218,7 @@ case 39:
 YY_RULE_SETUP
 #line 203 "spec.lex"
 {
-	yylval = false;
+	yylval = 0;
 	return FALSEV;
 }
 	YY_BREAK

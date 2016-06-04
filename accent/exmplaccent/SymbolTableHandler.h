@@ -4,7 +4,7 @@
 #include "StackHandler.h"
 #include "HashTableHandler.h"
 
-Stack stackTable;
+Stack *stackTable;
 
 void PrepareST();
 

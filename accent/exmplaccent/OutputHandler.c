@@ -57,7 +57,7 @@ void HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 
 	if (strcmp(command, "=") == 0)
 	{
-		res = Concat4Strings("= ",op1,op2);
+		res = Concat3Strings("= ",op1,op2);
 	}
 	else if (strcmp(command, "+") == 0)
 	{
@@ -117,7 +117,7 @@ void HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 	}
 	else if (strcmp(command, "JMP") == 0)
 	{
-		res = Concat2Strings("JMP ",op1)
+		res = Concat2Strings("JMP ",op1);
 	}
 	else if (strcmp(command, "JZ") == 0)
 	{
@@ -197,7 +197,7 @@ void HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 		// Nothing to Handle
 	}
 
-	writeOutput(res);
+	WriteOutput(res);
 }
 
 void WriteOutput(char* input) {

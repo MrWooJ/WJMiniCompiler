@@ -1,5 +1,3 @@
-using namespace std;
-
 #ifndef OutputHandler   /* Include guard */
 #define OutputHandler
 

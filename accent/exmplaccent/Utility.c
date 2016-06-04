@@ -1,15 +1,17 @@
 #include <stdio.h>
+#include "stdlib.h"
 #include "Utility.h"
-#include "outputHandler.h"
+#include "OutputHandler.h"
 
 int i = 0;
 int j = 0;
 
 char* ProduceTempVar()
 {
-	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(itoa(i)) );
+	char *str = Int2String(i);
+	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(str) );
 	strcpy(str3, "$t");
-	strcat(str3, itoa(i));
+	strcat(str3, str);
 	i=i+1;
 	return str3;
 }
@@ -17,17 +19,19 @@ char* ProduceTempVar()
 char* UseOfTempVar()
 {
 	i--;
-	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(itoa(i)) );
+	char *str = Int2String(i);
+	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(str) );
 	strcpy(str3, "$t");
-	strcat(str3, itoa(i));
+	strcat(str3, str);
 	return str3;
 }
 
 char* ProduceBlockLabel()
 {
-	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(itoa(j)) );
+	char *str = Int2String(j);
+	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(str) );
 	strcpy(str3, "BLK");
-	strcat(str3, itoa(j));
+	strcat(str3, str);
 	j=j+1;
 	return str3;
 }
@@ -35,9 +39,10 @@ char* ProduceBlockLabel()
 char* UseOfBlockLabel()
 {
 	j--;
-	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(itoa(j)) );
+	char *str = Int2String(j);
+	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(str) );
 	strcpy(str3, "BLK");
-	strcat(str3, itoa(j));
+	strcat(str3, str);
 	return str3;
 }
 
@@ -115,4 +120,11 @@ char* ProduceParameters(Array *a)
 	for (i = 0; i < a->size; i++)
 		res = Concat2Strings(res,a->array[i]);
 	return res;
+}
+
+char* Int2String(int a)
+{
+	char n1[20];
+	snprintf(n1, sizeof(n1), "%d",a);
+	return n1;
 }

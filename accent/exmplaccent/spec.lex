@@ -196,12 +196,12 @@ MULTILINECOMMENT {
 }
 
 "true" {
-	yylval = true;
+	yylval = 1;
 	return TRUEV;
 }
 
 "false" {
-	yylval = false;
+	yylval = 0;
 	return FALSEV;
 }
 

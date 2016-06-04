@@ -5,17 +5,17 @@ void Stack_Init(Stack *S)
 	S->size = 0;
 }
 
-hashtable_s Stack_Top(Stack *S)
+hashtable_t* Stack_Top(Stack *S)
 {
 	if (S->size == 0) {
 		fprintf(stderr, "Error: stack empty\n");
-		return -1;
+		return;
 	} 
 
 	return S->data[S->size-1];
 }
 
-void Stack_Push(Stack *S, hashtable_s d)
+void Stack_Push(Stack *S, hashtable_t* d)
 {
 	if (S->size < STACK_MAX)
 		S->data[S->size++] = d;
@@ -31,11 +31,11 @@ void Stack_Pop(Stack *S)
 		S->size--;
 }
 
-hashtable_s Stack_Element(Stack *S, int i)
+hashtable_t* Stack_Element(Stack *S, int i)
 {
 	if (S->size == 0) {
 		fprintf(stderr, "Error: stack empty\n");
-		return -1;
+		return;
 	} 
 
 	return S->data[i];
