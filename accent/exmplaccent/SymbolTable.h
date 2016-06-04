@@ -11,7 +11,7 @@ typedef unordered_map<string, string> stringmap;
 class SymbolTable
 {
 	private:		
-		stack<stringmap> table;
+	stack<stringmap> table;
 
 	public:
 
@@ -19,14 +19,13 @@ class SymbolTable
 
 	void ExitScope();
 
-	void AddId(String id, String info);
+	void AddId(string id, string info);
 
-	String Lookup(String sym);
+	string Lookup(string sym);
 
-	String Probe(String sym);
+	string Probe(string sym);
 
-	void ErrorPrump_IdNotFound(int line, String id);
+	void ErrorPrump_IdNotFound(int line, string id);
 
-	void ErrorPrump_IdDuplicated(int line, String id);
-
-}
+	void ErrorPrump_IdDuplicated(int line, string id);
+};

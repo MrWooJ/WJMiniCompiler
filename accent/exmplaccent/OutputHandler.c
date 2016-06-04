@@ -51,7 +51,7 @@ char* Concat4Strings(char* str1, char* str2, char* str3, char* str4)
 	return str9;
 }
 
-HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
+void HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 {
 	char* res;
 
@@ -200,7 +200,7 @@ HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 	writeOutput(res);
 }
 
-WriteOutput(char* input) {
+void WriteOutput(char* input) {
 
 	printf("INPUT: %s\n", input);
 

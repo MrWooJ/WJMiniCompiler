@@ -1,9 +1,7 @@
 %prelude {
-#include "SymbolTable.h"
+#include "SymbolTableHandler.h"
 #include "OutputHandler.h"
 #include "Utility.h"
-
-SymbolTable ST;
 
 int arrDecNumber = 0;
 int arrDecProduction = 1;
@@ -16,17 +14,19 @@ char* variableType;
 
 int useOfArrayVar = 0;
 
-int = useOfResVar = 0;
+int useOfResVar = 0;
+
 char* VariableName;
 
+PrepareST();
+
 }
-	 
+
 %token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
 
 %nodefault
 
 null_point :
-
 ;
 
 program :
@@ -34,7 +34,7 @@ program :
 | program_parts program
 ;
 
-program_parts:
+program_parts :
   var_dcl
 | func_proc
 | struct_dec
@@ -47,51 +47,52 @@ func_proc :
 ;
 
 arguments :
-| argument
+  argument
 | argument COMMA arguments
 ;
 
 array_dcl<n> :
 	%prelude { int simpleArray = 1; }
-  null_point { if (arrDecNumber == 0) { *n = 0; } else { if (simpleArray == 1) { *n = 1; } else {*n = arrDecProduction; arrDecProduction = 1; } } arrDecNumber = 0; }
-| OPENINGBRACE CLOSINGBRACE { arrDecNumber++; simpleArray = 1; } array_dcl
-| OPENINGBRACE INTNUMBER<x> CLOSINGBRACE { arrDecNumber++;  simpleArray = 0; arrDecProduction*= x; } array_dcl
+  null_point { if (arrDecNumber == 0) { *n = 0; } else { if (simpleArray == 1) { *n = 1; } else { *n = arrDecProduction; arrDecProduction = 1; } } arrDecNumber = 0; }
+| OPENINGBRACE CLOSINGBRACE { arrDecNumber++; simpleArray = 1; } array_dcl<m>
+| OPENINGBRACE INTNUMBER<x> CLOSINGBRACE { arrDecNumber++; simpleArray = 0; arrDecProduction = arrDecProduction * x; } array_dcl<m>
 ;
 
 argument :
-  type<x> ID_CODE<y> array_dcl<z> { char* size; if (z == 0) { size = GetSizeOf(x); HandleCodeGenerator("ARG", size, y, ""); } else { size = GetSizeOf(x); char* arrSzie = itoa(z); HandleCodeGenerator("ARG", size, arrSize, y); } }
+	%prelude { int check = 0; }
+  type<x> ID_CODE<y> { string str = ST.Lookup(y); if (str.empty()) { ST.AddId(y,x); } else { ST.ErrorPrump_IdDuplicated(1,y); return; } } array_dcl<z> { char* size; if (z == 0) { size = GetSizeOf(x); HandleCodeGenerator("ARG", size, y, ""); } else { size = GetSizeOf(x); char* arrSzie = itoa(z); HandleCodeGenerator("ARG", size, arrSize, y); } }
 ;
 
 func_dcl<n> :
-  type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON { *n = y }
-| type<x> ID_CODE<y> { char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block { *n = y }
+  type<x> ID_CODE<y> { string str = ST.Lookup(y); if (str.empty()) { ST.AddId(y,x); } else { ST.ErrorPrump_IdDuplicated(1,y); return; } char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON { *n = y; }
+| type<x> ID_CODE<y> { string str = ST.Lookup(y); if (str.empty()) { ST.AddId(y,x); } else { ST.ErrorPrump_IdDuplicated(1,y); return; } char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block<m> { *n = y; }
 ;
 
 extern_dcl :
-  EXTERN type ID_CODE SEMICOLON
+  EXTERN type<x> ID_CODE<y> { string str = ST.Lookup(y); if (str.empty()) { ST.AddId(y,x); } else { ST.ErrorPrump_IdDuplicated(1,y); return; } } SEMICOLON
 ;
 
 proc_dcl :
   PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
-| PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+| PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block<m>
 ;
 
 type<n> :
-  INT {*n = "int"}
-| BOOLEAN {*n = "bool"}
-| FLOAT {*n = "float"}
-| LONG {*n = "long"}
-| CHARKEYWORD {*n = "char"}
-| DOUBLE {*n = "double"}
-| ID_CODE<m> {*n = m} 
-| STRINGKEYWORD {*n = "string"}
-| VOID {*n = "void"}
-| AUTO {*n = "auto"}
+  INT { *n = "int"; }
+| BOOLEAN { *n = "bool"; }
+| FLOAT { *n = "float"; }
+| LONG { *n = "long"; }
+| CHARKEYWORD { *n = "char"; }
+| DOUBLE { *n = "double"; }
+| ID_CODE<m> { *n = m; } 
+| STRINGKEYWORD { *n = "string"; }
+| VOID { *n = "void"; }
+| AUTO { *n = "auto"; }
 ;
 
 var_dcl:
   %prelude { int i = 0; }
-  ( CONST { i = 1; } )? type<x> { variableType = x; } var_dcl_cnts SEMICOLON { }
+  ( CONST { i = 1; } )? type<x> { variableType = x; } var_dcl_cnts SEMICOLON
 ;
 
 var_dcl_cnts:
@@ -100,12 +101,12 @@ var_dcl_cnts:
 ;
     
 var_dcl_cnt:
-  variable<x> { size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x, ""); } else { HandleCodeGenerator("ARR", size, arrCmptProduction, x); arrCmptProduction = 1; useOfArrayVar = 0; } }
-| assignment_expr 
+  variable<x> { string str = ST.Lookup(x); if (str.empty()) { ST.AddId(x,variableType); } else { ST.ErrorPrump_IdDuplicated(1,x); return; } size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x, ""); } else { HandleCodeGenerator("ARR", size, arrCmptProduction, x); arrCmptProduction = 1; useOfArrayVar = 0; } }
+| assignment_expr<m>
 ;
 
 struct_dec:
-  RECORD ID_CODE OPENCURLYBRACE { ST.EnterScope(); } var_dcl CLOSECURLYBRACE { ST.ExitScope(); } SEMICOLON
+  RECORD ID_CODE<x> { string str = ST.Lookup(x); if (str.empty()) { ST.AddId(x,"REC"); } else { ST.ErrorPrump_IdDuplicated(1,x); return; } } OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
 ;
 
 block<n> :
@@ -113,51 +114,51 @@ block<n> :
 ;
 
 arithmatic_low_level<n> :
-  ADDUNARYPLUS<x> {*n = x}
-| SUBUNARYMINUS<x> {*n = x}
+  ADDUNARYPLUS<x> { *n = x; }
+| SUBUNARYMINUS<x> { *n = x; }
 ;
 
 arithmatic_high_level<n> :
-  PRODUCTION<x> {*n = x}
-| DIV<x> {*n = x}
-| MOD<x> {*n = x}
-| ARITHMETICAND<x> {*n = x}
-| ARITHMETICOR<x> {*n = x}
-| XOR<x> {*n = x}
-| LOGICALOR<x> {*n = x}
-| LOGICALAND<x> {*n = x}
+  PRODUCTION<x> { *n = x; }
+| DIV<x> { *n = x; }
+| MOD<x> { *n = x; }
+| ARITHMETICAND<x> { *n = x; }
+| ARITHMETICOR<x> { *n = x; }
+| XOR<x> { *n = x; }
+| LOGICALOR<x> { *n = x; }
+| LOGICALAND<x> { *n = x; }
 ;
 
 arithmatic<n> :
-  ADDUNARYPLUS<x> {*n = x}
-| SUBUNARYMINUS<x> {*n = x}
-| PRODUCTION<x> {*n = x}
-| DIV<x> {*n = x}
-| MOD<x> {*n = x}
-| ARITHMETICAND<x> {*n = x}
-| ARITHMETICOR<x> {*n = x}
-| XOR<x> {*n = x}
-| LOGICALOR<x> {*n = x}
-| LOGICALAND<x> {*n = x}
+  ADDUNARYPLUS<x> { *n = x; }
+| SUBUNARYMINUS<x> { *n = x; }
+| PRODUCTION<x> { *n = x; }
+| DIV<x> { *n = x; }
+| MOD<x> { *n = x; }
+| ARITHMETICAND<x> { *n = x; }
+| ARITHMETICOR<x> { *n = x; }
+| XOR<x> { *n = x; }
+| LOGICALOR<x> { *n = x; }
+| LOGICALAND<x> { *n = x; }
 ;
 
 conditional<n> :
-  EQUAL<x> {*n = x}
-| NOTEQUAL<x> {*n = x}
-| BIGGEROREQUAL<x> {*n = x}
-| LESSOREQUAL<x> {*n = x}
-| LESSTHAN<x> {*n = x}
-| BIGGERTHAN<x> {*n = x}
+  EQUAL<x> { *n = x; }
+| NOTEQUAL<x> { *n = x; }
+| BIGGEROREQUAL<x> { *n = x; }
+| LESSOREQUAL<x> { *n = x; }
+| LESSTHAN<x> { *n = x; }
+| BIGGERTHAN<x> { *n = x; }
 ;
 
 binary_op<n> :
-  arithmatic<x> {*n = x}
-| conditional<x> {*n = x}
+  arithmatic<x> { *n = x; }
+| conditional<x> { *n = x; }
 ;
 
 parameters<n> :
   expr<x> { insertArray(&parametersArray, x); *n = ProduceParameters(&parametersArray); freeArray(&parametersArray); }
-| expr<x> { insertArray(&parametersArray, x); } COMMA parameters
+| expr<x> { insertArray(&parametersArray, x); } COMMA parameters<m>
 ;
 
 method_call_expr :
@@ -171,12 +172,12 @@ array_complete_dcl<n> :
 ;
 
 variable<n> :
-  ID_CODE<x> { *n = x; }
-| ID_CODE<x> array_complete_dcl<y> { useOfArrayVar = 1; *n = x; }
-| DECREMENT variable
-| INCREMENT variable
-| variable DECREMENT
-| variable INCREMENT
+  ID_CODE<x> { string str = ST.Lookup(x); if (str.empty()) { ST.ErrorPrump_IdNotFound(1,x); } else { *n = x; } }
+| ID_CODE<x> { string str = ST.Lookup(x); if (str.empty()) { ST.ErrorPrump_IdNotFound(1,x); } else { *n = x; } } array_complete_dcl<y> { useOfArrayVar = 1; *n = x; }
+| DECREMENT variable<m>
+| INCREMENT variable<m>
+| variable<m> DECREMENT
+| variable<m> INCREMENT
 ;
 
 const_val<n> :
@@ -191,23 +192,23 @@ assignment_expr<n> :
   variable<x> { useOfResVar = 1; VariableName = x; } ASSIGNMENT expr<y> { HandleCodeGenerator("=",x,y,""); useOfResVar = 0; }
 ;
 
-expr_assign:
-  expr 
-| assignment_expr
+expr_assign :
+  expr<m>
+| assignment_expr<m>
 ;
 
 loop_stmt :
-  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( expr_assign )? CLOSINGPAREBTHESIS block
-| REPEAT block UNTIL OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS SEMICOLON
-| FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
+  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr<k> SEMICOLON ( expr_assign )? CLOSINGPAREBTHESIS block<l>
+| REPEAT block<m> UNTIL OPENINGPAREBTHESIS expr<l> CLOSINGPAREBTHESIS SEMICOLON
+| FOREACH OPENINGPAREBTHESIS ID_CODE<y> { string str = ST.Lookup(y); if (str.empty()) { ST.AddId(y,"VAR"); } else { ST.ErrorPrump_IdDuplicated(1,x); return; } } IN ID_CODE<z> { string str = ST.Lookup(z); if (str.empty()) { ST.ErrorPrump_IdNotFound(1,z); } } CLOSINGPAREBTHESIS block<f>
 ;
 
 term<n> :
-  term<x> arithmatic_low_level<y> factor<y> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
+  term<x> arithmatic_low_level<y> factor<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
 | factor<x>
 ;
 
-factor<n> { factorCounter++; } :
+factor<n> :
   factor<x> arithmatic_high_level<y> primary<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
 | primary<x> { *n = x; }
 ;
@@ -220,18 +221,18 @@ primary<n> :
 
 expr<n> :
   term<x>
-| expr<x> conditional expr<y> {}
-| OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
+| expr<x> conditional<m> expr<y>
+| OPENINGPAREBTHESIS expr<y> CLOSINGPAREBTHESIS
 | method_call_expr
 | variable<x> { *n = x; }
-| const_val
-| SUBUNARYMINUS expr
-| NOT expr
+| const_val<m>
+| SUBUNARYMINUS expr<m>
+| NOT expr<m>
 ;
 
 cond_statement :
   IF OPENINGPAREBTHESIS expr<x> CLOSINGPAREBTHESIS block<y> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JNZ",blockLabel,x,""); } ( ELSE block<z> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JZ",blockLabel,z,""); } )?
-| SWITCH OPENINGPAREBTHESIS ID_CODE<x> CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE { ST.EnterScope(); } ( CASE INTNUMBER<y> COLON block<z> )* DEFAULT COLON block CLOSECURLYBRACE { ST.ExitScope(); }
+| SWITCH OPENINGPAREBTHESIS ID_CODE<x> CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE { ST.EnterScope(); } ( CASE INTNUMBER<y> COLON block<z> )* DEFAULT COLON block<m> CLOSECURLYBRACE { ST.ExitScope(); }
 ;
 
 gotofunc :
@@ -243,14 +244,14 @@ labeltoken :
 ;
 
 statement_expr :
-  assignment_expr SEMICOLON
+  assignment_expr<m> SEMICOLON
 | cond_statement
 | loop_stmt
 | method_call_expr SEMICOLON
-| RETURN { int i = 0; }( expr<x> { i = 1; })? SEMICOLON { if(i == 0) { HandleCodeGenerator("RET",x,"",""); } else HandleCodeGenerator("RET","","",""); };
+| RETURN { int i = 0; } ( expr<x> { i = 1; } )? SEMICOLON { if(i == 0) { HandleCodeGenerator("RET",x,"",""); } else HandleCodeGenerator("RET","","",""); }
 | gotofunc SEMICOLON
 | labeltoken
 | BREAK SEMICOLON
 | CONTINUE SEMICOLON
-| SIZEOF OPENINGPAREBTHESIS type CLOSINGPAREBTHESIS SEMICOLON
+| SIZEOF OPENINGPAREBTHESIS type<m> CLOSINGPAREBTHESIS SEMICOLON
 ;

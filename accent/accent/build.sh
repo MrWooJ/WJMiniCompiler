@@ -3,7 +3,7 @@
 set -e
 set -x
 
-CC=cc
+CC=g++
 
 $CC -o accent actions.c ana.c auxil.c bnf.c code.c encode.c flatten.c \
    yylex.c verbose.c lexinfo.c main.c output.c sets.c yytab.c \

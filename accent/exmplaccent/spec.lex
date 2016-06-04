@@ -176,7 +176,7 @@ VOIDKEY {
 }
 
 "\'"."\'" {
-	yylval = (char)(yytext);
+	yylval = (yytext);
 	return CHAR;
 }
 
@@ -187,10 +187,12 @@ VOIDKEY {
 
 SINGLELINECOMMENT {
 	/* IGNORING COMMENTS */
+	return 0;
 }
 
 MULTILINECOMMENT {
 	/* IGNORING COMMENTS */
+	return 0;
 }
 
 "true" {
@@ -225,6 +227,7 @@ ID {
 
 [ \t] {
 	/* IGNORE WHITESPACE */
+	return 0;
 }
 
 \n {
@@ -232,82 +235,102 @@ ID {
 }
 
 "!=" {
+	yylval = yytext;
 	return NOTEQUAL;
 }
 
 "!" {
+	yylval = yytext;
 	return NOT;
 }
 
 "<=" {
+	yylval = yytext;
 	return LESSOREQUAL;
 }
 
 "<" {
+	yylval = yytext;
 	return LESSTHAN;
 }
 
 "=>" {
+	yylval = yytext;
 	return BIGGEROREQUAL;
 }
 
 ">" {
+	yylval = yytext;
 	return BIGGERTHAN;
 }
 
 "==" {
+	yylval = yytext;
 	return EQUAL;
 }
 
 "="	{
+	yylval = yytext;
 	return ASSIGNMENT;
 }
 
 "--" {
+	yylval = yytext;
 	return DECREMENT;
 }
 
 "-" {
+	yylval = yytext;
 	return SUBUNARYMINUS;
 }
 
 "++" {
+	yylval = yytext;
 	return INCREMENT;
 }
 
 "+" {
+	yylval = yytext;
 	return ADDUNARYPLUS;
 }
 
 "/" {
+	yylval = yytext;
 	return DIV;
 }
 
 "*" {
+	yylval = yytext;
 	return PRODUCTION;
 }
 
 "%" {
+	yylval = yytext;
 	return MOD;
 }
 
 "&&" {
+	yylval = yytext;
 	return LOGICALAND;
 }
 
 "&" {
+	yylval = yytext;
 	return ARITHMETICAND;
 }
 
 "||" {
+	yylval = yytext;
 	return LOGICALOR;
 }
 
 "|" {
+	yylval = yytext;
 	return ARITHMETICOR;
 }
 
 "^" {
+	yylval = yytext;
 	return XOR;
 }
 
@@ -347,8 +370,8 @@ ID {
 	return SEMICOLON;
 }
 
-<<EOF>> {
-	return EOF;
+'EOF' {
+	return 0;
 }
 
 . {

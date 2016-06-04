@@ -11,7 +11,7 @@
    for(;;) {
       /* 1: eof */
       if (ch <= 0) {
-	 yyerror("EOF inside action block");
+	 yyerror("EOF inside action block GHAT");
 	 break;
       }
 

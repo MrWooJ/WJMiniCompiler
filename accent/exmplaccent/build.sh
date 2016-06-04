@@ -1,14 +1,17 @@
 #!/bin/sh
 
+clear
+clear
+
 ACCENT=../accent/./accent
 ENTIRE=../entire/entire.c
 LEX=flex
-CC=g++
+CC=gcc
 
 $ACCENT spec.acc
 
 $LEX spec.lex
 
-$CC -o program -w yygrammar.c lex.yy.c auxil.c $ENTIRE
+$CC -w -g yygrammar.c lex.yy.c auxil.c OutputHandler.c SymbolTableHandler.c HashTableHandler.c StackHandler.c Utility.c $ENTIRE -o program
 
 ./program < input

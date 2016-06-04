@@ -16,7 +16,7 @@ void SymbolTable::ExitScope()
 	table.pop();
 }
 
-void SymbolTable::AddId(String id, String info)
+void SymbolTable::AddId(string id, string info)
 {
 	if (table.empty())
 	{
@@ -27,9 +27,9 @@ void SymbolTable::AddId(String id, String info)
 	map.insert({{id, info}});
 }
 
-String SymbolTable::Lookup(String sym)
+string SymbolTable::Lookup(string sym)
 {
-	String info;
+	string info;
 
 	if (table.empty())
 	{
@@ -43,7 +43,7 @@ String SymbolTable::Lookup(String sym)
 		stringmap map = (stringmap)table.pop();
 		tempTable.push(map);
 
-		String tempInfo = map.at(sym);
+		string tempInfo = map.at(sym);
 		if (!tempInfo.empty())
 		{
 			info = tempInfo;
@@ -60,7 +60,7 @@ String SymbolTable::Lookup(String sym)
 	return info;
 }
 
-String SymbolTable::Probe(String sym)
+string SymbolTable::Probe(string sym)
 {
 	if (table.empty())
 	{
@@ -72,12 +72,12 @@ String SymbolTable::Probe(String sym)
 	return map.at(sym);
 }
 
-void SymbolTable::ErrorPrump_IdNotFound(int line, String id)
+void SymbolTable::ErrorPrump_IdNotFound(int line, string id)
 {
 	cout << "Error in line: " << line << "\n" << " => " << "Identifier " << id << " Not Found!"; 
 }
 
-void SymbolTable::ErrorPrump_IdDuplicated(int line, String id)
+void SymbolTable::ErrorPrump_IdDuplicated(int line, string id)
 {
 	cout << "Error in line: " << line << "\n" << " => " << "Identifier " << id << " Duplicated!"; 
 }
