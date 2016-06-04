@@ -1,5 +1,4 @@
 %{
-#include "yystype.h"
 #include "yygrammar.h"
 %}
 
@@ -177,12 +176,12 @@ VOIDKEY {
 }
 
 "\'"."\'" {
-	yylval.charval = (char)(yytext);
+	yylval = (char)(yytext);
 	return CHAR;
 }
 
 "\"".*"\"" {
-	yylval.stringval = yytext;
+	yylval = yytext;
 	return STRING;
 }
 
@@ -195,32 +194,32 @@ MULTILINECOMMENT {
 }
 
 "true" {
-	yylval.boolval = true;
+	yylval = true;
 	return TRUEV;
 }
 
 "false" {
-	yylval.boolval = false;
+	yylval = false;
 	return FALSEV;
 }
 
 ID {
-	yylval.stringval = yytext;
+	yylval = yytext;
 	return ID_CODE;
 }
 
 [-+]?{DIGIT}+ {
-	yylval.intval = atoi(yytext);
+	yylval = atoi(yytext);
 	return INTNUMBER;
 }
 
 [-+]?0[xX][0-9a-fA-F]+ {
-	yylval.intval = atoi(yytext);
+	yylval = atoi(yytext);
 	return INTNUMBER;
 }
 
 [-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)? {
-	yylval.floatval = atof(yytext);
+	yylval = atof(yytext);
 	return REALNUMBER;
 }
 

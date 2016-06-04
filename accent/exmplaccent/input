@@ -1,9 +1,11 @@
-int fun1()
+int fun1(int q, char[] w)
 {
     int a,b;
     int c=7;
     int d;
     int e;
+    int[] f;
+    int[2][3] g;
     a=b+c+d+e+f*g;
     return a;
 }

@@ -1,13 +1,11 @@
-#ifndef outputHandler   /* Include guard */
-#define outputHandler
+#ifndef Utility   /* Include guard */
+#define Utility
 
 typedef struct {
   char* *array;
   size_t used;
   size_t size;
 } Array;
-
-HandleCodeGenerator(char* command, char* op1, char* op2, char* op3);
 
 char* GetSizeOf(char* input);
 

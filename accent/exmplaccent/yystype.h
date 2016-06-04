@@ -7,6 +7,7 @@ typedef union {
 	char charval;
 	char* stringval;
 	bool boolval;
+	char* result;
 } ATTRIBUTE;
 
 #define YYSTYPE ATTRIBUTE

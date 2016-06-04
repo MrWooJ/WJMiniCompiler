@@ -3,7 +3,7 @@
 ACCENT=../accent/./accent
 ENTIRE=../entire/entire.c
 LEX=flex
-CC=gcc
+CC=g++
 
 $ACCENT spec.acc
 

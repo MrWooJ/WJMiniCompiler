@@ -1,6 +1,9 @@
 %prelude {
-#include "yystype.h"
-#include "outputHandler.h"
+#include "SymbolTable.h"
+#include "OutputHandler.h"
+#include "Utility.h"
+
+SymbolTable ST;
 
 int arrDecNumber = 0;
 int arrDecProduction = 1;
@@ -102,11 +105,11 @@ var_dcl_cnt:
 ;
 
 struct_dec:
-  RECORD ID_CODE OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
+  RECORD ID_CODE OPENCURLYBRACE { ST.EnterScope(); } var_dcl CLOSECURLYBRACE { ST.ExitScope(); } SEMICOLON
 ;
 
 block<n> :
-  OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE { *n = ProduceBlockLabel(); }
+  OPENCURLYBRACE { ST.EnterScope(); } ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE { ST.ExitScope(); } { *n = ProduceBlockLabel(); }
 ;
 
 arithmatic_low_level<n> :
@@ -217,7 +220,7 @@ primary<n> :
 
 expr<n> :
   term<x>
-| expr conditional expr
+| expr<x> conditional expr<y> {}
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
 | variable<x> { *n = x; }
@@ -228,7 +231,7 @@ expr<n> :
 
 cond_statement :
   IF OPENINGPAREBTHESIS expr<x> CLOSINGPAREBTHESIS block<y> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JNZ",blockLabel,x,""); } ( ELSE block<z> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JZ",blockLabel,z,""); } )?
-| SWITCH OPENCURLYBRACE ID_CODE<x> CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER<y> COLON block<z> )* DEFAULT COLON block CLOSECURLYBRACE
+| SWITCH OPENINGPAREBTHESIS ID_CODE<x> CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE { ST.EnterScope(); } ( CASE INTNUMBER<y> COLON block<z> )* DEFAULT COLON block CLOSECURLYBRACE { ST.ExitScope(); }
 ;
 
 gotofunc :
