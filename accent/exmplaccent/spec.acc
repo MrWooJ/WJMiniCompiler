@@ -1,7 +1,9 @@
 %prelude {
+#include <stdio.h>
 #include "SymbolTableHandler.h"
 #include "OutputHandler.h"
 #include "Utility.h"
+#include "yystype.h"
 
 int arrDecNumber = 0;
 int arrDecProduction = 1;
@@ -20,17 +22,12 @@ char* VariableName;
 
 }
 
-%token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
-
-%nodefault
-
-null_point :
-;
+%token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
 
 program :
-	%prelude { PrepareST(); }
-  program_parts
-| program_parts program
+  %prelude { PrepareST(); }
+  { printf("Find"); } program_parts
+| { printf("Find"); } program_parts program
 ;
 
 program_parts :
@@ -40,7 +37,7 @@ program_parts :
 ;
 
 func_proc :
-  func_dcl<x> { HandleCodeGenerator("END", x, "", ""); }
+  func_dcl<x> { HandleCodeGenerator("END", x.str, "", ""); }
 | proc_dcl
 | extern_dcl
 ;
@@ -50,25 +47,26 @@ arguments :
 | argument COMMA arguments
 ;
 
+
 array_dcl<n> :
 	%prelude { int simpleArray = 1; }
-  null_point { if (arrDecNumber == 0) { *n = 0; } else { if (simpleArray == 1) { *n = 1; } else { *n = arrDecProduction; arrDecProduction = 1; } } arrDecNumber = 0; }
+  null_point { if (arrDecNumber == 0) { n->num = 0; } else { if (simpleArray == 1) { n->num = 1; } else { n->num = arrDecProduction; arrDecProduction = 1; } } arrDecNumber = 0; }
 | OPENINGBRACE CLOSINGBRACE { arrDecNumber++; simpleArray = 1; } array_dcl<m>
-| OPENINGBRACE INTNUMBER<x> CLOSINGBRACE { arrDecNumber++; simpleArray = 0; arrDecProduction = arrDecProduction * x; } array_dcl<m>
+| OPENINGBRACE INTNUMBER<x> CLOSINGBRACE { arrDecNumber++; simpleArray = 0; arrDecProduction = arrDecProduction * x.num; } array_dcl<m>
 ;
 
 argument :
 	%prelude { int check = 0; char *arrSize1; }
-  type<x> ID_CODE<y> { char* str6 = Lookup(y); if ((str6 != NULL) && (str6[0] != '\0')) { AddId(y,x); } else { ErrorPrump_IdDuplicated(1,y); return; } } array_dcl<z> { char* sizex; if (z == 0) { sizex = GetSizeOf(x); HandleCodeGenerator("ARG", sizex, y, ""); } else { sizex = GetSizeOf(x); arrSize1 = Int2String(z); HandleCodeGenerator("ARG", sizex, arrSize1, y); } }
+  type<x> ID_CODE<y> { char* str6 = Lookup(y.str); if ((str6 != NULL) && (str6[0] != '\0')) { AddId(y.str,x.str); } else { ErrorPrump_IdDuplicated(1,y.str); } } array_dcl<z> { char* sizex; if (z.num == 0) { sizex = GetSizeOf(x.str); HandleCodeGenerator("ARG", sizex, y.str, ""); } else { sizex = GetSizeOf(x.str); arrSize1 = Int2String(z.num); HandleCodeGenerator("ARG", sizex, arrSize1, y.str); } }
 ;
 
 func_dcl<n> :
-  type<x> ID_CODE<y> { char* str = Lookup(y); if ((str != NULL) && (str[0] != '\0')) { AddId(y,x); } else { ErrorPrump_IdDuplicated(1,y); return; } char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON { *n = y; }
-| type<x> ID_CODE<y> { char* str = Lookup(y); if ((str != NULL) && (str[0] != '\0')) { AddId(y,x); } else { ErrorPrump_IdDuplicated(1,y); return; } char* size = GetSizeOf(x); HandleCodeGenerator("FUN", y, size, ""); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block<m> { *n = y; }
+  type<x> ID_CODE<y> { printf("FUNDCL"); char* str = Lookup(y.str); if ((str != NULL) && (str[0] != '\0')) { AddId(y.str,x.str); char* size = GetSizeOf(x.str); HandleCodeGenerator("FUN", y.str, size, ""); } else { ErrorPrump_IdDuplicated(1,y.str); } printf("DD"); } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON { n->str = y.str; }
+| type<x> ID_CODE<y> { char* str = Lookup(y.str); if ((str != NULL) && (str[0] != '\0')) { AddId(y.str,x.str); char* size = GetSizeOf(x.str); HandleCodeGenerator("FUN", y.str, size, ""); } else { ErrorPrump_IdDuplicated(1,y.str); } } OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block<m> { n->str = y.str; }
 ;
 
 extern_dcl :
-  EXTERN type<x> ID_CODE<y> { char* str = Lookup(y); if ((str != NULL) && (str[0] != '\0')) { AddId(y,x); } else { ErrorPrump_IdDuplicated(1,y); return; } } SEMICOLON
+  EXTERN type<x> ID_CODE<y> { char* str = Lookup(y.str); if ((str != NULL) && (str[0] != '\0')) { AddId(y.str,x.str); } else { ErrorPrump_IdDuplicated(1,y.str); } } SEMICOLON
 ;
 
 proc_dcl :
@@ -77,102 +75,102 @@ proc_dcl :
 ;
 
 type<n> :
-  INT { *n = "int"; }
-| BOOLEAN { *n = "bool"; }
-| FLOAT { *n = "float"; }
-| LONG { *n = "long"; }
-| CHARKEYWORD { *n = "char"; }
-| DOUBLE { *n = "double"; }
-| ID_CODE<m> { *n = m; } 
-| STRINGKEYWORD { *n = "char *"; }
-| VOID { *n = "void"; }
-| AUTO { *n = "auto"; }
+  INT { n->str = "int"; }
+| BOOLEAN { n->str = "bool"; }
+| FLOAT { printf("FLOATFIND"); n->str = "float"; }
+| LONG { n->str = "long"; }
+| CHARKEYWORD { n->str = "char"; }
+| DOUBLE { n->str = "double"; }
+| ID_CODE<m> { n->str = m.str; } 
+| STRINGKEYWORD { n->str = "char *"; }
+| VOID { n->str = "void"; }
+| AUTO { n->str = "auto"; }
 ;
 
-var_dcl:
+var_dcl :
   %prelude { int i = 0; }
-  ( CONST { i = 1; } )? type<x> { variableType = x; } var_dcl_cnts SEMICOLON
+  ( CONST { i = 1; } )? type<x> { variableType = x.str; } var_dcl_cnts SEMICOLON
 ;
 
-var_dcl_cnts:
+var_dcl_cnts :
   var_dcl_cnt
 | var_dcl_cnt COMMA var_dcl_cnts
 ;
     
-var_dcl_cnt:
-  variable<x> { char* str4 = Lookup(x); if ((str4 != NULL) && (str4[0] != '\0')) { AddId(x,variableType); } else { ErrorPrump_IdDuplicated(1,x); return; } char* size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x, ""); } else { HandleCodeGenerator("ARR", size, arrCmptProduction, x); arrCmptProduction = 1; useOfArrayVar = 0; } }
-| assignment_expr<m>
+var_dcl_cnt :
+  assignment_expr<m>
+| variable<x> { char* str4 = Lookup(x.str); if ((str4 != NULL) && (str4[0] != '\0')) { AddId(x.str,variableType); char* size = GetSizeOf(variableType); if (useOfArrayVar == 0) { HandleCodeGenerator("VAR", size, x.str, ""); } else { HandleCodeGenerator("ARR", size, Int2String(arrCmptProduction), x.str); arrCmptProduction = 1; useOfArrayVar = 0; } } else { ErrorPrump_IdDuplicated(1,x.str); } } 
 ;
 
-struct_dec:
-  RECORD ID_CODE<x> { char* str = Lookup(x); if ((str != NULL) && (str[0] != '\0')) { AddId(x,"REC"); } else { ErrorPrump_IdDuplicated(1,x); return; } } OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
+struct_dec :
+  RECORD ID_CODE<x> { char* str = Lookup(x.str); if ((str != NULL) && (str[0] != '\0')) { AddId(x.str,"REC"); } else { ErrorPrump_IdDuplicated(1,x.str); } } OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
 ;
 
 block<n> :
-  OPENCURLYBRACE { EnterScope(); } ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE { ExitScope(); } { *n = ProduceBlockLabel(); }
+  OPENCURLYBRACE { EnterScope(); } ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE { ExitScope(); n->str = ProduceBlockLabel(); }
 ;
 
 arithmatic_low_level<n> :
-  ADDUNARYPLUS<x> { *n = x; }
-| SUBUNARYMINUS<x> { *n = x; }
+  ADDUNARYPLUS<x> { n->str = x.str; }
+| SUBUNARYMINUS<x> { n->str = x.str; }
 ;
 
 arithmatic_high_level<n> :
-  PRODUCTION<x> { *n = x; }
-| DIV<x> { *n = x; }
-| MOD<x> { *n = x; }
-| ARITHMETICAND<x> { *n = x; }
-| ARITHMETICOR<x> { *n = x; }
-| XOR<x> { *n = x; }
-| LOGICALOR<x> { *n = x; }
-| LOGICALAND<x> { *n = x; }
+  PRODUCTION<x> { n->str = x.str; }
+| DIV<x> { n->str = x.str; }
+| MOD<x> { n->str = x.str; }
+| ARITHMETICAND<x> { n->str = x.str; }
+| ARITHMETICOR<x> { n->str = x.str; }
+| XOR<x> { n->str = x.str; }
+| LOGICALOR<x> { n->str = x.str; }
+| LOGICALAND<x> { n->str = x.str; }
 ;
 
 arithmatic<n> :
-  ADDUNARYPLUS<x> { *n = x; }
-| SUBUNARYMINUS<x> { *n = x; }
-| PRODUCTION<x> { *n = x; }
-| DIV<x> { *n = x; }
-| MOD<x> { *n = x; }
-| ARITHMETICAND<x> { *n = x; }
-| ARITHMETICOR<x> { *n = x; }
-| XOR<x> { *n = x; }
-| LOGICALOR<x> { *n = x; }
-| LOGICALAND<x> { *n = x; }
+  ADDUNARYPLUS<x> { n->str = x.str; }
+| SUBUNARYMINUS<x> { n->str = x.str; }
+| PRODUCTION<x> { n->str = x.str; }
+| DIV<x> { n->str = x.str; }
+| MOD<x> { n->str = x.str; }
+| ARITHMETICAND<x> { n->str = x.str; }
+| ARITHMETICOR<x> { n->str = x.str; }
+| XOR<x> { n->str = x.str; }
+| LOGICALOR<x> { n->str = x.str; }
+| LOGICALAND<x> { n->str = x.str; }
 ;
 
 conditional<n> :
-  EQUAL<x> { *n = x; }
-| NOTEQUAL<x> { *n = x; }
-| BIGGEROREQUAL<x> { *n = x; }
-| LESSOREQUAL<x> { *n = x; }
-| LESSTHAN<x> { *n = x; }
-| BIGGERTHAN<x> { *n = x; }
+  EQUAL<x> { n->str = x.str; }
+| NOTEQUAL<x> { n->str = x.str; }
+| BIGGEROREQUAL<x> { n->str = x.str; }
+| LESSOREQUAL<x> { n->str = x.str; }
+| LESSTHAN<x> { n->str = x.str; }
+| BIGGERTHAN<x> { n->str = x.str; }
 ;
 
 binary_op<n> :
-  arithmatic<x> { *n = x; }
-| conditional<x> { *n = x; }
+  arithmatic<x> { n->str = x.str; }
+| conditional<x> { n->str = x.str; }
 ;
 
 parameters<n> :
-  expr<x> { insertArray(&parametersArray, x); *n = ProduceParameters(&parametersArray); freeArray(&parametersArray); }
-| expr<x> { insertArray(&parametersArray, x); } COMMA parameters<m>
+  expr<x> { insertArray(&parametersArray, x.str); n->str = ProduceParameters(&parametersArray); freeArray(&parametersArray); }
+| expr<x> { insertArray(&parametersArray, x.str); } COMMA parameters<m>
 ;
 
 method_call_expr :
 	%prelude { int hasParameters = 0; }
-  ID_CODE<x> OPENINGPAREBTHESIS ( { initArray(&parametersArray, 5); } parameters<y> { hasParameters = 1; } )? CLOSINGPAREBTHESIS { if(hasParameters == 0) { HandleCodeGenerator("CALL",x,"",""); } else { HandleCodeGenerator("CALL",x,y,""); } }
+  ID_CODE<x> OPENINGPAREBTHESIS ( { initArray(&parametersArray, 5); } parameters<y> { hasParameters = 1; } )? CLOSINGPAREBTHESIS { if(hasParameters == 0) { HandleCodeGenerator("CALL",x.str,"",""); } else { HandleCodeGenerator("CALL",x.str,y.str,""); } }
 ;
 
 array_complete_dcl<n> :
-  OPENINGBRACE expr<x> CLOSINGBRACE { *n = arrCmptProduction * x; }
-| OPENINGBRACE expr<x> CLOSINGBRACE { arrCmptProduction = arrCmptProduction * x; } array_complete_dcl<y> 
+  OPENINGBRACE expr<x> CLOSINGBRACE { n->num = arrCmptProduction * x.num; }
+| OPENINGBRACE expr<x> CLOSINGBRACE { arrCmptProduction = arrCmptProduction * x.num; } array_complete_dcl<y> 
 ;
 
 variable<n> :
-  ID_CODE<x> { char * str = Lookup(x); if ((str != NULL) && (str[0] != '\0')) { ErrorPrump_IdNotFound(1,x); } else { *n = x; } }
-| ID_CODE<x> { char * str = Lookup(x); if ((str != NULL) && (str[0] != '\0')) { ErrorPrump_IdNotFound(1,x); } else { *n = x; } } array_complete_dcl<y> { useOfArrayVar = 1; *n = x; }
+  ID_CODE<x> { char * str = Lookup(x.str); if ((str != NULL) && (str[0] != '\0')) { ErrorPrump_IdNotFound(1,x.str); } else { n->str = x.str; } }
+| ID_CODE<x> { char * str = Lookup(x.str); if ((str != NULL) && (str[0] != '\0')) { ErrorPrump_IdNotFound(1,x.str); } else { n->str = x.str; } } array_complete_dcl<y> { useOfArrayVar = 1; n->str = x.str; }
 | DECREMENT variable<m>
 | INCREMENT variable<m>
 | variable<m> DECREMENT
@@ -180,15 +178,15 @@ variable<n> :
 ;
 
 const_val<n> :
-  INTNUMBER<x> { *n = x; }
-| REALNUMBER<x> { *n = x; }
-| CHAR<x> { *n = x; }
-| BOOLEAN<x> { *n = x; }
-| STRING<x> { *n = x; }
+  INTNUMBER<x> { n->num = x.num; }
+| REALNUMBER<x> { n->numf = x.numf; n->num = x.num; }
+| CHAR<x> { n->num = x.num; }
+| BOOLEAN<x> { n->num = x.num; }
+| STRING<x> { n->num = x.num; }
 ;
 
 assignment_expr<n> :
-  variable<x> { useOfResVar = 1; VariableName = x; } ASSIGNMENT expr<y> { HandleCodeGenerator("=",x,y,""); useOfResVar = 0; }
+  variable<x> { printf("AE"); useOfResVar = 1; VariableName = x.str; } ASSIGNMENT expr<y> { HandleCodeGenerator("=",x.str,y.str,""); useOfResVar = 0; }
 ;
 
 expr_assign :
@@ -199,47 +197,30 @@ expr_assign :
 loop_stmt :
   FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr<k> SEMICOLON ( expr_assign )? CLOSINGPAREBTHESIS block<l>
 | REPEAT block<m> UNTIL OPENINGPAREBTHESIS expr<l> CLOSINGPAREBTHESIS SEMICOLON
-| FOREACH OPENINGPAREBTHESIS ID_CODE<y> { char* str2 = Lookup(y); if ((str2 != NULL) && (str2[0] != '\0')) { AddId(y,"VAR"); } else { ErrorPrump_IdDuplicated(1,y); return; } } IN ID_CODE<z> { char * str1 = Lookup(z); if ((str1 != NULL) && (str1[0] != '\0')) { ErrorPrump_IdNotFound(1,z); } } CLOSINGPAREBTHESIS block<f>
-;
-
-term<n> :
-  term<x> arithmatic_low_level<y> factor<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
-| factor<x>
-;
-
-factor<n> :
-  factor<x> arithmatic_high_level<y> primary<z> { char* temp = ProduceTempVar(); HandleCodeGenerator(y,temp,x,z); *n = temp; }
-| primary<x> { *n = x; }
-;
-
-primary<n> :
-  INTNUMBER<x> { *n = x; }
-| REALNUMBER<x> { *n = x; }
-| OPENINGPAREBTHESIS term<x> CLOSINGPAREBTHESIS
+| FOREACH OPENINGPAREBTHESIS ID_CODE<y> { char* str2 = Lookup(y.str); if ((str2 != NULL) && (str2[0] != '\0')) { AddId(y.str,"VAR"); } else { ErrorPrump_IdDuplicated(1,y.str); } } IN ID_CODE<z> { char * str1 = Lookup(z.str); if ((str1 != NULL) && (str1[0] != '\0')) { ErrorPrump_IdNotFound(1,z.str); } } CLOSINGPAREBTHESIS block<f>
 ;
 
 expr<n> :
-  term<x>
-| expr<x> conditional<m> expr<y>
+  expr<x> conditional<m> expr<y>
 | OPENINGPAREBTHESIS expr<y> CLOSINGPAREBTHESIS
 | method_call_expr
-| variable<x> { *n = x; }
+| variable<x> { n->str = x.str; }
 | const_val<m>
 | SUBUNARYMINUS expr<m>
 | NOT expr<m>
 ;
 
 cond_statement :
-  IF OPENINGPAREBTHESIS expr<x> CLOSINGPAREBTHESIS block<y> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JNZ",blockLabel,x,""); } ( ELSE block<z> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JZ",blockLabel,z,""); } )?
+  IF OPENINGPAREBTHESIS expr<x> CLOSINGPAREBTHESIS block<y> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JNZ",blockLabel,x.str,""); } ( ELSE block<z> { char* blockLabel = UseOfBlockLabel(); HandleCodeGenerator("JZ",blockLabel,z.str,""); } )?
 | SWITCH OPENINGPAREBTHESIS ID_CODE<x> CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE { EnterScope(); } ( CASE INTNUMBER<y> COLON block<z> )* DEFAULT COLON block<m> CLOSECURLYBRACE { ExitScope(); }
 ;
 
 gotofunc :
-  GOTO ID_CODE<x> { HandleCodeGenerator("JMP",x,"",""); }
+  GOTO ID_CODE<x> { HandleCodeGenerator("JMP",x.str,"",""); }
 ;
 
 labeltoken :
-  ID_CODE<x> COLON { HandleCodeGenerator("LB",x,"",""); }
+  ID_CODE<x> COLON { HandleCodeGenerator("LB",x.str,"",""); }
 ;
 
 statement_expr :
@@ -247,10 +228,14 @@ statement_expr :
 | cond_statement
 | loop_stmt
 | method_call_expr SEMICOLON
-| RETURN { int i = 0; } ( expr<x> { i = 1; } )? SEMICOLON { if(i == 0) { HandleCodeGenerator("RET",x,"",""); } else HandleCodeGenerator("RET","","",""); }
+| RETURN { int i = 0; } ( expr<x> { i = 1; } )? SEMICOLON { if(i == 0) { HandleCodeGenerator("RET",x.str,"",""); } else { HandleCodeGenerator("RET","","",""); } }
 | gotofunc SEMICOLON
 | labeltoken
 | BREAK SEMICOLON
 | CONTINUE SEMICOLON
 | SIZEOF OPENINGPAREBTHESIS type<m> CLOSINGPAREBTHESIS SEMICOLON
+;
+
+null_point :
+
 ;

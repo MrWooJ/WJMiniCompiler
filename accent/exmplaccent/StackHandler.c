@@ -1,11 +1,11 @@
 #include "StackHandler.h"
 
-void Stack_Init(Stack *S)
+void Stack_Init(stack *S)
 {
 	S->size = 0;
 }
 
-hashtable_t* Stack_Top(Stack *S)
+hashtable_t* Stack_Top(stack *S)
 {
 	if (S->size == 0) {
 		fprintf(stderr, "Error: stack empty\n");
@@ -15,7 +15,7 @@ hashtable_t* Stack_Top(Stack *S)
 	return S->data[S->size-1];
 }
 
-void Stack_Push(Stack *S, hashtable_t* d)
+void Stack_Push(stack *S, hashtable_t* d)
 {
 	if (S->size < STACK_MAX)
 		S->data[S->size++] = d;
@@ -23,7 +23,7 @@ void Stack_Push(Stack *S, hashtable_t* d)
 		fprintf(stderr, "Error: stack full\n");
 }
 
-void Stack_Pop(Stack *S)
+void Stack_Pop(stack *S)
 {
 	if (S->size == 0)
 		fprintf(stderr, "Error: stack empty\n");
@@ -31,7 +31,7 @@ void Stack_Pop(Stack *S)
 		S->size--;
 }
 
-hashtable_t* Stack_Element(Stack *S, int i)
+hashtable_t* Stack_Element(stack *S, int i)
 {
 	if (S->size == 0) {
 		fprintf(stderr, "Error: stack empty\n");

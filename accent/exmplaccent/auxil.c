@@ -8,12 +8,12 @@ yyerror(msg)
    char *msg;
 {
    extern long yypos;
+   extern char* yylval;
 
-   printf("line %d: %s\n", yypos, msg);
-   exit(1);
+   printf("line %d %s: %s\n", yypos, yylval, msg);
 }
 
 yywrap()
 {
-   return 1;
+   return 0;
 }

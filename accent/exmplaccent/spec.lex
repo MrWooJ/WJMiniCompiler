@@ -1,344 +1,313 @@
 %{
+#include <string.h>
+#include "yystype.h"
 #include "yygrammar.h"
 %}
 
 DIGIT [0-9]
 VARIABLE [a-zA-Z]+[0-9]*
 
-ID = (([a-zA-Z]+[0-9]*)(_{0,2}([a-zA-Z]|[0-9])+)*)|(_{1,2}([a-zA-Z]|[0-9])+(_{0,2}([a-zA-Z]|[0-9])+)*)
+ID1 _?{VARIABLE}_?*{VARIABLE}*
+ID (([a-zA-Z]+[0-9]*)(_{0,2}([a-zA-Z]|[0-9])+)*)|(_{1,2}([a-zA-Z]|[0-9])+(_{0,2}([a-zA-Z]|[0-9])+)*)
 
-BOOLKEY = bool
-BREAKKEY = break
-CASEKEY = case
-CHARKEY = char
-CONSTKEY = const
-CONTINUEKEY = continue
-DEFAULTKEY = default
-DOUBLEKEY = double
-ELSEKEY = else
-EXTERNKEY = extern
-FUNCTIONKEY = function
-FLOATKEY = float
-FORKEY = for
-GOTOKEY = goto
-IFKEY = if
-INPUTKEY = input
-INTKEY = int
-LONGKEY = long
-OUTPUTKEY = output
-RETURNKEY = return
-SZIEOFKEY = sizeof
-STATICKEY = static
-STRINGKEY = string
-SWITChKEY = switch
-VOIDKEY = void
-UNTILKEY = until
-RECORDKEY = record
-REPEATKEY = repeat 
-PROCEDUREKEY = procedure
-FOREACHKEY = foreach
-AUTOKEY = auto
-OFKEY = of
-INKEY = in
+BOOLKEY bool
+BREAKKEY break
+CASEKEY case
+CHARKEY char
+CONSTKEY const
+CONTINUEKEY continue
+DEFAULTKEY default
+DOUBLEKEY double
+ELSEKEY else
+EXTERNKEY extern
+FUNCTIONKEY function
+FLOATKEY float
+FORKEY for
+GOTOKEY goto
+IFKEY if
+INPUTKEY input
+INTKEY int
+LONGKEY long
+OUTPUTKEY output
+RETURNKEY return
+SZIEOFKEY sizeof
+STATICKEY static
+STRINGKEY string
+SWITChKEY switch
+VOIDKEY void
+UNTILKEY until
+RECORDKEY record
+REPEATKEY repeat 
+PROCEDUREKEY procedure
+FOREACHKEY foreach
+AUTOKEY auto
+OFKEY of
+INKEY in
 
 %%
 
-AUTOKEY {
+<<EOF>> {
+	printf("EORF");
+	return 0;
+}
+
+{AUTOKEY} {
 	return AUTO;
 }
 
-BOOLKEY {
+{BOOLKEY} {
 	return BOOLEAN;
 }
 
-BREAKKEY {
+{BREAKKEY} {
 	return BREAK;
 }
 
-CASEKEY {
+{CASEKEY} {
 	return CASE;
 }
 
-CHARKEY {
+{CHARKEY} {
 	return CHARKEYWORD;
 }
 
-CONSTKEY {
+{CONSTKEY} {
 	return CONST;
 }
 
-CONTINUEKEY {
+{CONTINUEKEY} {
 	return CONTINUE;
 }
 
-DEFAULTKEY {
+{DEFAULTKEY} {
 	return DEFAULT;
 }
 
-DOUBLEKEY {
+{DOUBLEKEY} {
 	return DOUBLE;
 }
 
-ELSEKEY {
+{ELSEKEY} {
 	return ELSE;
 }
 
-EXTERNKEY {
+{EXTERNKEY} {
 	return EXTERN;
 }
 
-FUNCTIONKEY {
+{FUNCTIONKEY} {
 	return FUNCTION;
 }
 
-FLOATKEY {
+{FLOATKEY} {
 	return FLOAT;
 }
 
-FOREACHKEY {
+{FOREACHKEY} {
 	return FOREACH;
 }
 
-FORKEY {
+{FORKEY} {
 	return FOR;
 }
 
-GOTOKEY {
+{GOTOKEY} {
 	return GOTO;
 }
 
-IFKEY {
+{IFKEY} {
 	return IF;
 }
 
-INPUTKEY {
+{INPUTKEY} {
 	return INPUT;
 }
 
-INTKEY {
+{INTKEY} {
+	printf("INT\n");
 	return INT;
 }
 
-INKEY {
+{INKEY} {
 	return IN;
 }
 
-LONGKEY {
+{LONGKEY} {
 	return LONG;
 }
 
-OFKEY {
+{OFKEY} {
 	return OF;
 }
 
-OUTPUTKEY {
+{OUTPUTKEY} {
 	return OUTPUT;
 }
 
-PROCEDUREKEY {
+{PROCEDUREKEY} {
 	return PROCEDURE;
 }
 
-RECORDKEY {
+{RECORDKEY} {
 	return RECORD;
 }
 
-REPEATKEY {
+{REPEATKEY} {
 	return REPEAT;
 }
 
-RETURNKEY {
+{RETURNKEY} {
 	return RETURN;
 }
 
-SZIEOFKEY {
+{SZIEOFKEY} {
 	return SIZEOF;
 }
 
-STATICKEY {
+{STATICKEY} {
 	return STATIC;
 }
 
-STRINGKEY {
+{STRINGKEY} {
 	return STRINGKEYWORD;
 }
 
-SWITChKEY {
+{SWITChKEY} {
 	return SWITCH;
 }
 
-UNTILKEY {
+{UNTILKEY} {
 	return UNTIL;
 }
 
-VOIDKEY {
+{VOIDKEY} {
 	return VOID;
 }
 
 "\'"."\'" {
-	yylval = (yytext);
+	yylval.str = yytext;
 	return CHAR;
 }
 
 "\"".*"\"" {
-	yylval = yytext;
+	yylval.str = yytext;
 	return STRING;
 }
 
 SINGLELINECOMMENT {
 	/* IGNORING COMMENTS */
-	return 0;
 }
 
 MULTILINECOMMENT {
 	/* IGNORING COMMENTS */
-	return 0;
 }
 
 "true" {
-	yylval = 1;
+	yylval.num = 1;
 	return TRUEV;
 }
 
 "false" {
-	yylval = 0;
+	yylval.num = 0;
 	return FALSEV;
-}
-
-ID {
-	yylval = yytext;
-	return ID_CODE;
-}
-
-[-+]?{DIGIT}+ {
-	yylval = atoi(yytext);
-	return INTNUMBER;
-}
-
-[-+]?0[xX][0-9a-fA-F]+ {
-	yylval = atoi(yytext);
-	return INTNUMBER;
-}
-
-[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)? {
-	yylval = atof(yytext);
-	return REALNUMBER;
 }
 
 [ \t] {
 	/* IGNORE WHITESPACE */
-	return 0;
 }
 
 \n {
-	yypos++;
+	printf("NL\n");
+	yypos = yypos + 1;
 }
 
 "!=" {
-	yylval = yytext;
 	return NOTEQUAL;
 }
 
 "!" {
-	yylval = yytext;
 	return NOT;
 }
 
 "<=" {
-	yylval = yytext;
 	return LESSOREQUAL;
 }
 
 "<" {
-	yylval = yytext;
 	return LESSTHAN;
 }
 
 "=>" {
-	yylval = yytext;
 	return BIGGEROREQUAL;
 }
 
 ">" {
-	yylval = yytext;
 	return BIGGERTHAN;
 }
 
 "==" {
-	yylval = yytext;
 	return EQUAL;
 }
 
 "="	{
-	yylval = yytext;
 	return ASSIGNMENT;
 }
 
 "--" {
-	yylval = yytext;
 	return DECREMENT;
 }
 
 "-" {
-	yylval = yytext;
 	return SUBUNARYMINUS;
 }
 
 "++" {
-	yylval = yytext;
 	return INCREMENT;
 }
 
 "+" {
-	yylval = yytext;
 	return ADDUNARYPLUS;
 }
 
 "/" {
-	yylval = yytext;
 	return DIV;
 }
 
 "*" {
-	yylval = yytext;
 	return PRODUCTION;
 }
 
 "%" {
-	yylval = yytext;
 	return MOD;
 }
 
 "&&" {
-	yylval = yytext;
 	return LOGICALAND;
 }
 
 "&" {
-	yylval = yytext;
 	return ARITHMETICAND;
 }
 
 "||" {
-	yylval = yytext;
 	return LOGICALOR;
 }
 
 "|" {
-	yylval = yytext;
 	return ARITHMETICOR;
 }
 
 "^" {
-	yylval = yytext;
 	return XOR;
 }
 
 "{" {
+	printf("{{{\n");
 	return OPENCURLYBRACE;
 }
 
 "}" {
+	printf("}}}\n");
 	return CLOSECURLYBRACE;
 }
 
@@ -367,13 +336,31 @@ ID {
 }
 
 ";" {
+	printf(";;;\n");
 	return SEMICOLON;
 }
 
-'EOF' {
-	return 0;
+{ID1} {
+	printf("%s\n", yytext);
+	yylval.str = yytext;
+	return ID_CODE;
 }
 
-. {
-	yyerror("illegal token");
+[-+]?{DIGIT}+ {
+	yylval.str = yytext;
+	yylval.num = atoi(yytext);
+	return INTNUMBER;
+}
+
+[-+]?0[xX][0-9a-fA-F]+ {
+	yylval.str = yytext;
+	yylval.num = atoi(yytext);
+	return INTNUMBER;
+}
+
+[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)? {
+	yylval.str = yytext;
+	yylval.numf = atof(yytext);
+	yylval.num = atoi(yytext);
+	return REALNUMBER;
 }

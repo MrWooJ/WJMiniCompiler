@@ -10,14 +10,14 @@ struct Stack {
 	int size;
 };
 
-typedef struct Stack Stack;
+typedef struct Stack stack;
 
-hashtable_t* Stack_Top(Stack *S);
+hashtable_t* Stack_Top(stack *S);
 
-void Stack_Push(Stack *S, hashtable_t* d);
+void Stack_Push(stack *S, hashtable_t* d);
 
-void Stack_Pop(Stack *S);
+void Stack_Pop(stack *S);
 
-hashtable_t* Stack_Element(Stack *S, int i);
+hashtable_t* Stack_Element(stack *S, int i);
 
 #endif

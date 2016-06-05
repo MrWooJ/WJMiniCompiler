@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include "stdlib.h"
+#include <stdlib.h>
+#include <string.h>
 #include "Utility.h"
 #include "OutputHandler.h"
 
@@ -9,6 +10,12 @@ int j = 0;
 char* ProduceTempVar()
 {
 	char *str = Int2String(i);
+	if ((str == NULL) || (str[0] == '\0'))
+	{
+		printf("ERROR IN PRODUCE TEMP VAR");
+		return 0;
+	}
+
 	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(str) );
 	strcpy(str3, "$t");
 	strcat(str3, str);
@@ -20,6 +27,12 @@ char* UseOfTempVar()
 {
 	i--;
 	char *str = Int2String(i);
+	if ((str == NULL) || (str[0] == '\0'))
+	{
+		printf("ERROR IN PRODUCE TEMP VAR");
+		return 0;
+	}
+
 	char* str3 = (char *) malloc( 1 + strlen("$t")+ strlen(str) );
 	strcpy(str3, "$t");
 	strcat(str3, str);
@@ -29,6 +42,12 @@ char* UseOfTempVar()
 char* ProduceBlockLabel()
 {
 	char *str = Int2String(j);
+	if ((str == NULL) || (str[0] == '\0'))
+	{
+		printf("ERROR IN PRODUCE TEMP VAR");
+		return 0;
+	}
+
 	char* str3 = (char *) malloc( 1 + strlen("BLK")+ strlen(str) );
 	strcpy(str3, "BLK");
 	strcat(str3, str);
@@ -116,15 +135,22 @@ void freeArray(Array *a) {
 char* ProduceParameters(Array *a)
 {
 	int i = 0;
-	char* res = "";
+	char* res;
 	for (i = 0; i < a->size; i++)
-		res = Concat2Strings(res,a->array[i]);
+		strcpy(res,Concat2Strings(res,a->array[i]));
 	return res;
 }
 
 char* Int2String(int a)
 {
-	char n1[20];
-	snprintf(n1, sizeof(n1), "%d",a);
+	char *n1;
+	snprintf(n1, "%d",a);
+
+	if ((n1 == NULL) || (n1[0] == '\0'))
+	{
+		printf("ERROR IN INT 2 STRING");
+		return 0;
+	}
+
 	return n1;
 }

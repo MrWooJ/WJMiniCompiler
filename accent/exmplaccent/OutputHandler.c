@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include "OutputHandler.h"
+#include <string.h>
 
 char* Concat2Strings(char* str1, char* str2)
 {
+	if (((str1 == NULL) || (str1[0] == '\0')) || ((str2 == NULL) || (str2[0] == '\0')))
+	{
+		printf("ERROR IN CONCAT 2 STRING");
+		return NULL;
+	}
+
 	char* str3 = (char *) malloc( 1 + strlen(str1)+ strlen(str2) );
 	strcpy(str3, str1);
 	strcat(str3, str2);
@@ -11,6 +18,12 @@ char* Concat2Strings(char* str1, char* str2)
 
 char* Concat3Strings(char* str1, char* str2, char* str3)
 {
+	if (((str1 == NULL) || (str1[0] == '\0')) || ((str2 == NULL) || (str2[0] == '\0')) || ((str3 == NULL) || (str3[0] == '\0')))
+	{
+		printf("ERROR IN CONCAT 3 STRING");
+		return NULL;
+	}
+
 	char* str4 = (char *) malloc( 1 + strlen(str1)+ strlen(str2) );
 	strcpy(str4, str1);
 	strcat(str4, str2);
@@ -28,6 +41,12 @@ char* Concat3Strings(char* str1, char* str2, char* str3)
 
 char* Concat4Strings(char* str1, char* str2, char* str3, char* str4)
 {
+	if (((str1 == NULL) || (str1[0] == '\0')) || ((str2 == NULL) || (str2[0] == '\0')) || ((str3 == NULL) || (str3[0] == '\0')) || ((str4 == NULL) || (str4[0] == '\0')))
+	{
+		printf("ERROR IN CONCAT 4 STRING");
+		return NULL;
+	}
+
 	char* str5 = (char *) malloc( 1 + strlen(str1)+ strlen(str2) );
 	strcpy(str5, str1);
 	strcat(str5, str2);
@@ -53,6 +72,7 @@ char* Concat4Strings(char* str1, char* str2, char* str3, char* str4)
 
 void HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 {
+	printf("YO");
 	char* res;
 
 	if (strcmp(command, "=") == 0)
@@ -206,7 +226,12 @@ void WriteOutput(char* input) {
 
 	FILE *fp;
 
-	fp = fopen("/home/output.txt", "a+");
+	fp = fopen("/home/hurricanc/desktop/output.txt", "a+");
+
+	if(fp == NULL) {
+		printf("Could not open input file");
+    	return -1;
+    }
 
 	int status = fputs(input, fp);
 	fputs("\n", fp);
