@@ -1,0 +1,214 @@
+%token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
+
+program :
+  { printf("%d\n", 3); } program_parts
+| program_parts program
+;
+
+program_parts :
+  var_dcl
+| func_proc
+| struct_dec
+;
+
+func_proc :
+  func_dcl
+| proc_dcl
+| extern_dcl
+;
+
+arguments :
+  argument
+| argument COMMA arguments
+;
+
+
+array_dcl :
+  null_point
+| OPENINGBRACE CLOSINGBRACE array_dcl
+| OPENINGBRACE INTNUMBER CLOSINGBRACE array_dcl
+;
+
+argument :
+  type ID_CODE array_dcl
+;
+
+func_dcl :
+  type ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON { printf("%d\n",3); }
+| type ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+;
+
+extern_dcl :
+  EXTERN type ID_CODE SEMICOLON
+;
+
+proc_dcl :
+  PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS SEMICOLON
+| PROCEDURE ID_CODE OPENINGPAREBTHESIS ( arguments )? CLOSINGPAREBTHESIS block
+;
+
+type :
+  INT
+| BOOLEAN
+| FLOAT
+| LONG
+| CHARKEYWORD
+| DOUBLE
+| ID_CODE
+| STRINGKEYWORD
+| VOID
+| AUTO
+;
+
+var_dcl :
+  ( CONST )? type var_dcl_cnts SEMICOLON
+;
+
+var_dcl_cnts :
+  var_dcl_cnt
+| var_dcl_cnt COMMA var_dcl_cnts
+;
+    
+var_dcl_cnt :
+  assignment_expr
+| variable
+;
+
+struct_dec :
+  RECORD ID_CODE OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
+;
+
+block :
+  OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE
+;
+
+arithmatic_low_level :
+  ADDUNARYPLUS
+| SUBUNARYMINUS
+;
+
+arithmatic_high_level :
+  PRODUCTION
+| DIV
+| MOD
+| ARITHMETICAND
+| ARITHMETICOR
+| XOR
+| LOGICALOR
+| LOGICALAND
+;
+
+arithmatic :
+  ADDUNARYPLUS
+| SUBUNARYMINUS
+| PRODUCTION
+| DIV
+| MOD
+| ARITHMETICAND
+| ARITHMETICOR
+| XOR
+| LOGICALOR
+| LOGICALAND
+;
+
+conditional :
+  EQUAL
+| NOTEQUAL
+| BIGGEROREQUAL
+| LESSOREQUAL
+| LESSTHAN
+| BIGGERTHAN
+;
+
+binary_op :
+  arithmatic
+| conditional
+;
+
+parameters :
+  expr
+| expr COMMA parameters
+;
+
+method_call_expr :
+  ID_CODE OPENINGPAREBTHESIS ( parameters )? CLOSINGPAREBTHESIS
+;
+
+array_complete_dcl :
+  OPENINGBRACE expr CLOSINGBRACE
+| OPENINGBRACE expr CLOSINGBRACE array_complete_dcl 
+;
+
+variable :
+  ID_CODE
+| ID_CODE array_complete_dcl 
+;
+
+const_val :
+  INTNUMBER
+| REALNUMBER
+| CHAR
+| BOOLEAN
+| STRING
+;
+
+assignment_expr :
+  variable ASSIGNMENT expr
+;
+
+expr_assign :
+  expr
+| assignment_expr
+;
+
+loop_stmt :
+  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( expr_assign )? CLOSINGPAREBTHESIS block
+| REPEAT block UNTIL OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS SEMICOLON
+| FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
+;
+
+double_unary_op :
+  INCREMENT
+| DECREMENT
+;
+expr :
+  expr conditional expr
+| OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
+| method_call_expr
+| variable
+| const_val
+| SUBUNARYMINUS expr
+| NOT expr
+| double_unary_op variable
+| variable double_unary_op
+;
+
+cond_statement :
+  IF OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS block ( ELSE block )?
+| SWITCH OPENINGPAREBTHESIS ID_CODE CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER COLON block )* DEFAULT COLON block CLOSECURLYBRACE
+;
+
+gotofunc :
+  GOTO ID_CODE
+;
+
+labeltoken :
+  ID_CODE COLON
+;
+
+statement_expr :
+  assignment_expr SEMICOLON
+| cond_statement
+| loop_stmt
+| method_call_expr SEMICOLON
+| RETURN ( expr )? SEMICOLON
+| gotofunc SEMICOLON
+| labeltoken
+| BREAK SEMICOLON
+| CONTINUE SEMICOLON
+| SIZEOF OPENINGPAREBTHESIS type CLOSINGPAREBTHESIS SEMICOLON
+;
+
+null_point :
+  { printf("Find\n"); }
+;

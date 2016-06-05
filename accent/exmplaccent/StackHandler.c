@@ -1,4 +1,5 @@
 #include "StackHandler.h"
+#include <stdio.h>
 
 void Stack_Init(stack *S)
 {

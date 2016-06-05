@@ -1,17 +1,13 @@
-%token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, EOF, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
+%token CHAR, STRING, TRUEV, FALSEV, ID_CODE, INTNUMBER, REALNUMBER, NOTEQUAL, NOT, LESSOREQUAL, LESSTHAN, BIGGEROREQUAL, BIGGERTHAN, EQUAL, ASSIGNMENT, DECREMENT, SUBUNARYMINUS, INCREMENT, ADDUNARYPLUS, DIV, PRODUCTION, MOD, LOGICALAND, ARITHMETICAND, LOGICALOR, ARITHMETICOR, XOR, OPENCURLYBRACE, CLOSECURLYBRACE, OPENINGBRACE, CLOSINGBRACE, OPENINGPAREBTHESIS, CLOSINGPAREBTHESIS, COMMA, SEMICOLON, COLON, BOOLEAN, BREAK, CASE, CHARKEYWORD, CONST, CONTINUE, DEFAULT, DOUBLE, ELSE, EXTERN, FUNCTION, FLOAT, FOR, GOTO, IF, INPUT, INT, LONG, OUTPUT, RETURN, SIZEOF, STATIC, STRINGKEYWORD, SWITCH, VOID, AUTO, RECORD, REPEAT, PROCEDURE, FOREACH, OF, IN, UNTIL;
 
 %nodefault
 
-null_point :
-
-;
-
 program :
-  program_parts
-| program_parts program
+  { printf("Find"); } program_parts
+| { printf("Find"); } program_parts program
 ;
 
-program_parts:
+program_parts :
   var_dcl
 | func_proc
 | struct_dec
@@ -24,12 +20,12 @@ func_proc :
 ;
 
 arguments :
-  null_point
-| argument
+  argument
 | argument COMMA arguments
 ;
 
-array_dcl:
+
+array_dcl :
   null_point
 | OPENINGBRACE CLOSINGBRACE array_dcl
 | OPENINGBRACE INTNUMBER CLOSINGBRACE array_dcl
@@ -66,26 +62,26 @@ type :
 | AUTO
 ;
 
-var_dcl:
-  ( CONST )? type var_dcl_cnts SEMICOLON 
+var_dcl :
+  ( CONST )? type var_dcl_cnts SEMICOLON
 ;
 
-var_dcl_cnts:
+var_dcl_cnts :
   var_dcl_cnt
 | var_dcl_cnt COMMA var_dcl_cnts
 ;
     
-var_dcl_cnt:
-  variable
-| ASSIGNMENT expr
+var_dcl_cnt :
+  assignment_expr
+| variable
 ;
 
-struct_dec:
+struct_dec :
   RECORD ID_CODE OPENCURLYBRACE var_dcl CLOSECURLYBRACE SEMICOLON
 ;
 
 block :
-  OPENCURLYBRACE ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE 
+  OPENCURLYBRACE { printf("Find"); } ( ( var_dcl | statement_expr ) )* CLOSECURLYBRACE { printf("Find"); }
 ;
 
 arithmatic_low_level :
@@ -141,17 +137,13 @@ method_call_expr :
 ;
 
 array_complete_dcl :
-  OPENINGBRACE expr CLOSINGBRACE array_complete_dcl
-| OPENINGBRACE expr CLOSINGBRACE
+  OPENINGBRACE expr CLOSINGBRACE
+| OPENINGBRACE expr CLOSINGBRACE array_complete_dcl 
 ;
 
 variable :
-  ID_CODE ( COMMA variable )?
-| ID_CODE array_complete_dcl
-| DECREMENT variable
-| INCREMENT variable
-| variable DECREMENT
-| variable INCREMENT
+  ID_CODE
+| ID_CODE array_complete_dcl 
 ;
 
 const_val :
@@ -166,42 +158,36 @@ assignment_expr :
   variable ASSIGNMENT expr
 ;
 
+expr_assign :
+  expr
+| assignment_expr
+;
+
 loop_stmt :
-  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( assignment_expr | expr )? CLOSINGPAREBTHESIS block
+  FOR OPENINGPAREBTHESIS ( var_dcl )? SEMICOLON expr SEMICOLON ( expr_assign )? CLOSINGPAREBTHESIS block
 | REPEAT block UNTIL OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS SEMICOLON
 | FOREACH OPENINGPAREBTHESIS ID_CODE IN ID_CODE CLOSINGPAREBTHESIS block
 ;
 
-term<n> :
-  term<x> arithmatic_low_level factor<y> {}
-| factor<n>
+double_unary_op :
+  INCREMENT
+| DECREMENT
 ;
-
-factor<n> :
-  factor<x> arithmatic_high_level primary<y> {}
-| primary<n>
-;
-
-primary<n> :
-  INTNUMBER<n>
-| REALNUMBER<n>
-| OPENINGPAREBTHESIS term<n> CLOSINGPAREBTHESIS
-;
-
 expr :
-  term<n>
-| expr conditional expr
+  expr conditional expr
 | OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS
 | method_call_expr
 | variable
 | const_val
 | SUBUNARYMINUS expr
 | NOT expr
+| double_unary_op variable
+| variable double_unary_op
 ;
 
 cond_statement :
   IF OPENINGPAREBTHESIS expr CLOSINGPAREBTHESIS block ( ELSE block )?
-| SWITCH OPENCURLYBRACE ID_CODE CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER COLON ( block )* )* DEFAULT COLON block CLOSECURLYBRACE
+| SWITCH OPENINGPAREBTHESIS ID_CODE CLOSINGPAREBTHESIS OF COLON OPENCURLYBRACE ( CASE INTNUMBER COLON block )* DEFAULT COLON block CLOSECURLYBRACE
 ;
 
 gotofunc :
@@ -223,4 +209,8 @@ statement_expr :
 | BREAK SEMICOLON
 | CONTINUE SEMICOLON
 | SIZEOF OPENINGPAREBTHESIS type CLOSINGPAREBTHESIS SEMICOLON
+;
+
+null_point :
+  { printf("Find"); }
 ;

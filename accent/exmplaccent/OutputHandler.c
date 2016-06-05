@@ -1,6 +1,28 @@
-#include <stdio.h>
 #include "OutputHandler.h"
+#include <stdio.h>
 #include <string.h>
+
+void WriteOutput(char* input) {
+
+	printf("INPUT: %s\n", input);
+
+	FILE *fp;
+
+	fp = fopen("/home/hurricanc/desktop/output.txt", "a+");
+
+	if(fp == NULL) {
+		printf("Could not open input file");
+    	return -1;
+    }
+
+	int status = fputs(input, fp);
+	fputs("\n", fp);
+
+	if (status < 0)
+		printf("Error in Output File!");
+
+	fclose(fp);
+}
 
 char* Concat2Strings(char* str1, char* str2)
 {
@@ -218,26 +240,4 @@ void HandleCodeGenerator(char* command, char* op1, char* op2, char* op3)
 	}
 
 	WriteOutput(res);
-}
-
-void WriteOutput(char* input) {
-
-	printf("INPUT: %s\n", input);
-
-	FILE *fp;
-
-	fp = fopen("/home/hurricanc/desktop/output.txt", "a+");
-
-	if(fp == NULL) {
-		printf("Could not open input file");
-    	return -1;
-    }
-
-	int status = fputs(input, fp);
-	fputs("\n", fp);
-
-	if (status < 0)
-		printf("Error in Output File!");
-
-	fclose(fp);
 }

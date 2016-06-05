@@ -1,5 +1,4 @@
 %{
-#include <string.h>
 #include "yystype.h"
 #include "yygrammar.h"
 %}
@@ -47,8 +46,7 @@ INKEY in
 %%
 
 <<EOF>> {
-	printf("EORF");
-	return 0;
+	return 'EOF';
 }
 
 {AUTOKEY} {
@@ -124,7 +122,6 @@ INKEY in
 }
 
 {INTKEY} {
-	printf("INT\n");
 	return INT;
 }
 
@@ -217,7 +214,6 @@ MULTILINECOMMENT {
 }
 
 \n {
-	printf("NL\n");
 	yypos = yypos + 1;
 }
 
@@ -302,12 +298,10 @@ MULTILINECOMMENT {
 }
 
 "{" {
-	printf("{{{\n");
 	return OPENCURLYBRACE;
 }
 
 "}" {
-	printf("}}}\n");
 	return CLOSECURLYBRACE;
 }
 
@@ -336,12 +330,10 @@ MULTILINECOMMENT {
 }
 
 ";" {
-	printf(";;;\n");
 	return SEMICOLON;
 }
 
 {ID1} {
-	printf("%s\n", yytext);
 	yylval.str = yytext;
 	return ID_CODE;
 }
